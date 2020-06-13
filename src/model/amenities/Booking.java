@@ -14,4 +14,20 @@ public class Booking {
         this.endDate = endDate;
         this.sizeOfParty = sizeOfParty;
     }
+
+    public int getBookingID() {
+        return this.bookingID;
+    }
+
+    public Date getStartDate() {
+        return this.startDate;
+    }
+
+    public Date getEndDate() {
+        return this.endDate;
+    }
+
+    public int getSizeOfParty() {
+        return this.sizeOfParty;
+    }
 }
