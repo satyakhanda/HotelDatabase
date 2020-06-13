@@ -4,6 +4,7 @@ import model.amenities.Booking;
 import model.amenities.Room;
 import model.customers.Account;
 import model.customers.Customer;
+import model.employees.Employee;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -154,6 +155,19 @@ public class DatabaseConnectionHandler {
             throwables.printStackTrace();
         }
         return allRooms;
+    }
+
+    public List<Employee> getEmployees() {
+        List<Employee> allEmployees = new ArrayList<>();
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("SELECT * " +
+                    "FROM Employee e");
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return allEmployees;
     }
 
     private void rollbackConnection() {
