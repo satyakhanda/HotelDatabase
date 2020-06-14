@@ -2,6 +2,8 @@ package model;
 
 import database.DatabaseConnectionHandler;
 
+
+
 public class Hotel {
     private DatabaseConnectionHandler dbHandler = null;
     public Hotel() {
@@ -11,6 +13,7 @@ public class Hotel {
     private void start() {
         //start login UI
         login(" ", " ");
+
     }
 
     private void end() {
@@ -28,6 +31,7 @@ public class Hotel {
         }
     }
     public static void main(String[] args) {
+
         Hotel hotel = new Hotel();
         hotel.start();
     }

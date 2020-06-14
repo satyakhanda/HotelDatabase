@@ -4,8 +4,10 @@ import model.amenities.Booking;
 import model.amenities.Room;
 import model.customers.Account;
 import model.customers.Customer;
+import model.employees.Employee;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -154,6 +156,70 @@ public class DatabaseConnectionHandler {
             throwables.printStackTrace();
         }
         return allRooms;
+    }
+
+    public List<Employee> getEmployees() {
+        List<Employee> allEmployees = new ArrayList<>();
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("SELECT * " +
+                    "FROM Employee e");
+            while(resultSet.next()) {
+                Employee curr = new Employee(resultSet.getInt("EmployeeID"),
+                        resultSet.getString("Emp_Name"),
+                        resultSet.getInt("HotelID"));
+                allEmployees.add(curr);
+            }
+            resultSet.close();
+            stmt.close();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return allEmployees;
+    }
+
+    public HashMap<Integer,Integer> averagePartySizePerHotel() {
+        HashMap<Integer,Integer> partySizes = new HashMap<>();
+
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("SELECT h.HotelID, AVG(b.SizeOfParty) " +
+                    "FROM CustomerMakesBooking cb, Booking b, HotelHasBooking h " +
+                    "WHERE b.BookingID = h.BookingID AND cb.BookingID = b.BookingID " +
+                    "GROUP BY h.HotelID");
+            while(resultSet.next()) {
+                partySizes.put(resultSet.getInt("h.HotelID"), resultSet.getInt("AVG(b.SizeOfParty)"));
+            }
+            resultSet.close();
+            stmt.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return partySizes;
+    }
+
+    public List<Room> getAvailableRooms() {
+        List<Room> availableRooms = new ArrayList<>();
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("SELECT r.Room_Number, r.Room_Date, r.Rate, r.BookingID " +
+                    "FROM Room r, Booking b " +
+                    "WHERE r.BookingID IS NULL OR (r.BookingID = b.BookingID AND " +
+                    "((b.StartDate > current_date) OR " +
+                    "(b.EndDate < current_date))) " +
+                    "ORDER BY r.Rate");
+            while(resultSet.next()) {
+                Room curr = new Room(resultSet.getInt("Room_Number"),
+                        resultSet.getDate("Room_Date"),
+                        resultSet.getInt("Rate"),
+                        bookings.get(resultSet.getInt("BookingID")));
+                availableRooms.add(curr);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return availableRooms;
     }
 
     private void rollbackConnection() {
