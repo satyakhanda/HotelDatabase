@@ -3,9 +3,9 @@ package model.customers;
 public class Account {
     private String username;
     private String password;
-    private int creditCard;
+    private String creditCard;
 
-    public Account(String username, String password, int creditCard) {
+    public Account(String username, String password, String creditCard) {
         this.username = username;
         this.password = password;
         this.creditCard = creditCard;
@@ -19,7 +19,7 @@ public class Account {
         return this.password;
     }
 
-    public int getCreditCard() {
+    public String getCreditCard() {
         return this.creditCard;
     }
 }

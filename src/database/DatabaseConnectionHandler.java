@@ -56,10 +56,11 @@ public class DatabaseConnectionHandler {
                 connection.close();
             }
 
-            connection = DriverManager.getConnection(ORACLE_URL, username, password);
+            connection = DriverManager.getConnection(ORACLE_URL, "ora_name88", "a43457738");
             connection.setAutoCommit(false);
 
             System.out.println("\nConnected to Oracle!");
+
             return true;
         } catch (SQLException e) {
             System.out.println(EXCEPTION_TAG + " " + e.getMessage());
@@ -95,7 +96,7 @@ public class DatabaseConnectionHandler {
             while(resultSet.next()) {
                 custAccount = new Account(resultSet.getString("Username"),
                                                   resultSet.getString("Password"),
-                                                  resultSet.getInt("CreditCard"));
+                                                  resultSet.getString("CreditCard"));
             }
             resultSet.close();
             stmt.close();
@@ -174,7 +175,7 @@ public class DatabaseConnectionHandler {
                 rollbackConnection();
             }
             PreparedStatement ps1 = connection.prepareStatement("INSERT INTO customerBooking VALUES (?,?)");
-            ps1.setInt(1, customer.getCreditCard());
+            ps1.setString(1, customer.getCreditCard());
             ps1.setInt(2, booking.getBookingID());
             ps1.executeUpdate();
             connection.commit();

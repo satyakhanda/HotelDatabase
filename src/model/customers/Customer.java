@@ -1,25 +1,25 @@
 package model.customers;
 
 public abstract class Customer {
-    private int creditCard;
+    private String creditCard;
     private String email;
-    private Account account;
-    private Payment paymentID;
+    private String account;
+    private int paymentID;
 
-    public Customer(int creditCard, String email, Account account, Payment paymentId) {
+    public Customer(String creditCard, String email, String account, int paymentId) {
         this.creditCard = creditCard;
         this.email = email;
         this.account = account;
         this.paymentID = paymentId;
     }
 
-    public int getCreditCard() {return this.creditCard;}
+    public String getCreditCard() {return this.creditCard;}
 
     public String getEmail() {return this.email;}
 
-    public Account getAccount() {return this.account;}
+    public String getAccount() {return this.account;}
 
-    public String getPaymentID() {return this.paymentID.getPaymentID();}
+    public int getPaymentID() {return this.paymentID;}
 
     public abstract void makePayment();
 

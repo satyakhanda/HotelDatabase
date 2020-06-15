@@ -1,7 +1,7 @@
 package model.customers;
 
 public class NonMember extends Customer {
-    public NonMember(int creditCard, String email, Account account, Payment paymentId) {
+    public NonMember(String creditCard, String email, String account, int paymentId) {
         super(creditCard, email, account, paymentId);
     }
 
