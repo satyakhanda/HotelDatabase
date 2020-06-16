@@ -68,14 +68,8 @@ public class DatabaseConnectionHandler {
 
             System.out.println("\nConnected to Oracle!");
             ScriptRunner sr = new ScriptRunner(connection);
-            Reader reader = new BufferedReader(new FileReader("src\\model\\scripts\\hoteldatabase.sql"));
+            Reader reader = new BufferedReader(new FileReader("src/model/scripts/hoteldatabase.sql"));
             sr.runScript(reader);
-
-            //getEmployees();
-//            Customer c = new NonMember("1234567891113434", "dave@gmail.com", "dave123", 100);
-//
-//            getBooking(c);
-
 
             return true;
         } catch (SQLException | FileNotFoundException e) {

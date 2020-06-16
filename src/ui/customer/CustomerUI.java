@@ -109,8 +109,8 @@ public class CustomerUI extends javax.swing.JFrame {
     private void loginActionPerformed(java.awt.event.ActionEvent evt) {
         Customer curr = dbHandler.getCustomer(username.getText(), password.getPassword().toString());
         if (curr == null) {
-            username.setText(" "); 
-            password.setText(" ");
+            username.setText("");
+            password.setText("");
         } else {
             java.awt.EventQueue.invokeLater(() -> new MakeBookingUI(curr, dbHandler).setVisible(true));
         }
