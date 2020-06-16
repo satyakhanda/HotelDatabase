@@ -14,4 +14,20 @@ public class Room {
         this.rate = rate;
         this.room_num = room_num;
     }
+
+    public int getRoom_num() {
+        return room_num;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public int getBooking() {
+        return booking;
+    }
+
+    public int getRate() {
+        return rate;
+    }
 }

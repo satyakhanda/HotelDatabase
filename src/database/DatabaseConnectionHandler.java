@@ -3,6 +3,7 @@ package database;
 import model.amenities.Booking;
 import model.amenities.Room;
 import model.customers.*;
+import model.employees.Cleaner;
 import model.employees.Employee;
 
 import java.io.BufferedReader;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import model.employees.Manager;
 import org.apache.ibatis.jdbc.ScriptRunner;
 
 //import ca.ubc.cs304.model.BranchModel;
@@ -71,7 +73,7 @@ public class DatabaseConnectionHandler {
 
             //getEmployees();
             Customer c = new NonMember("1234567891113434", "dave@gmail.com", "dave123", 100);
-            insertBooking(new Booking(160, new Date(2020,02,02), new Date(2020,02,05), 2),c);
+
             getBooking(c);
 
 
@@ -176,7 +178,7 @@ public class DatabaseConnectionHandler {
         return allRooms;
     }
 
-    public void insertBooking(Booking booking, Customer customer) {
+    public void insertBooking(Booking booking, Customer customer, Room room) {
         try {
             try {
                 PreparedStatement ps = connection.prepareStatement("INSERT INTO booking VALUES (?,?,?,?)");
@@ -189,6 +191,11 @@ public class DatabaseConnectionHandler {
                 ps.executeUpdate();
                 connection.commit();
                 ps.close();
+                Statement stmt = connection.createStatement();
+                String query = "UPDATE Room r " + "SET endDate = " + endDate +
+                        "AND bookingID = " + booking.getBookingID() + "WHERE r.room_number = " + room.getRoom_num();
+                ResultSet rs = stmt.executeQuery(query);
+                rs.close();
             } catch (SQLException e) {
                 System.out.println(EXCEPTION_TAG + " " + e.getMessage());
                 rollbackConnection();
@@ -224,6 +231,9 @@ public class DatabaseConnectionHandler {
                         "WHERE b.bookingId = " + bookingId;
                 ResultSet rs1 = stmt.executeQuery(query1);
                 rs1.close();
+                Statement stmt2 = connection.createStatement();
+                String query2 = "UPDATE Room r " + "SET endDate = " + endDate + "WHERE r.bookingID = " + bookingId;
+                ResultSet rs2 = stmt.executeQuery(query);
             } catch (SQLException e) {
                 System.out.println(EXCEPTION_TAG + " " + e.getMessage());
                 rollbackConnection();
@@ -246,6 +256,10 @@ public class DatabaseConnectionHandler {
                         "AND cb.creditCard = " + creditCard;
                 ResultSet rs1 = stmt.executeQuery(query1);
                 rs1.close();
+                Statement stmt2 = connection.createStatement();
+                String query2 = "UPDATE Room r " + "SET endDate = " + null + "AND bookingID = " +
+                        null + "WHERE r.bookingID = " + bookingId;
+                ResultSet rs2 = stmt.executeQuery(query);
             } catch (SQLException e) {
                 System.out.println(EXCEPTION_TAG + " " + e.getMessage());
                 rollbackConnection();
@@ -354,6 +368,49 @@ public class DatabaseConnectionHandler {
         return allEmployees;
     }
 
+    public List<Manager> getManagers() {
+        List<Manager> allManagers = new ArrayList<>();
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("SELECT * " +
+                    "FROM Manager m");
+            while(resultSet.next()) {
+                Manager curr = new Manager(resultSet.getInt("EmployeeID"),
+                        resultSet.getString("Mng_Name"),
+                        resultSet.getInt("HotelID"));
+                allManagers.add(curr);
+            }
+            resultSet.close();
+            stmt.close();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return allManagers;
+    }
+
+    public List<Cleaner> getCleanersForHotel(int hotelID) {
+        List<Cleaner> allCleaners = new ArrayList<>();
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("SELECT * " +
+                    "FROM Cleaner c WHERE c.HotelID = " + hotelID);
+            while(resultSet.next()) {
+                Cleaner curr = new Cleaner(resultSet.getInt("EmployeeID"),
+                        resultSet.getString("Cln_Name"),
+                        resultSet.getInt("HotelID"));
+                allCleaners.add(curr);
+            }
+            resultSet.close();
+            stmt.close();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return allCleaners;
+
+    }
+
     public HashMap<Integer,Integer> averagePartySizePerHotel() {
         HashMap<Integer,Integer> partySizes = new HashMap<>();
 
@@ -374,13 +431,13 @@ public class DatabaseConnectionHandler {
         return partySizes;
     }
 
-    public List<Room> getAvailableRooms() {
-        List<Room> availableRooms = new ArrayList<>();
+    public HashMap<String, Room> getAvailableRooms() {
+        HashMap<String, Room> hotelNameAndRooms = new HashMap<>();
         try {
             Statement stmt = connection.createStatement();
-            ResultSet resultSet = stmt.executeQuery("SELECT r.Room_Number, r.Room_Date, r.Rate, r.BookingID " +
-                    "FROM Room r, Booking b " +
-                    "WHERE r.BookingID IS NULL OR (r.BookingID = b.BookingID AND " +
+            ResultSet resultSet = stmt.executeQuery("SELECT r.Room_Number, r.Room_Date, r.Rate, r.BookingID, h.HotelName " +
+                    "FROM Room r, Booking b, HotelHasBooking hb, Hotel h " +
+                    "WHERE r.BookingID IS NULL OR (r.BookingID = b.BookingID AND b.BookingID = hb.BookingID AND hb.HotelID = h.HotelID " +
                     "((b.StartDate > current_date) OR " +
                     "(b.EndDate < current_date))) " +
                     "ORDER BY r.Rate");
@@ -389,12 +446,124 @@ public class DatabaseConnectionHandler {
                         resultSet.getDate("Room_Date"),
                         resultSet.getInt("Rate"),
                         resultSet.getInt("BookingID"));
-                availableRooms.add(curr);
+                hotelNameAndRooms.put(resultSet.getString("HotelName"),curr);
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
-        return availableRooms;
+        return hotelNameAndRooms;
+    }
+
+    public List<Room> getRoomsForHotel(int hotelID) {
+        List<Room> allRooms = new ArrayList<>();
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("SELECT r.Room_Number, r.Room_Date, r.Rate, r.BookingID " +
+                    "FROM Room r, Booking b, HotelHasBooking hb " +
+                    "WHERE r.BookingID IS NULL AND hb.HotelID = " + hotelID + " OR (r.BookingID = b.BookingID AND b.BookingID = hb.BookingID AND hb.HotelID ="+ hotelID +") " +
+                    "ORDER BY r.Rate");
+            while(resultSet.next()) {
+                Room curr = new Room(resultSet.getInt("Room_Number"),
+                        resultSet.getDate("Room_Date"),
+                        resultSet.getInt("Rate"),
+                        resultSet.getInt("BookingID"));
+                allRooms.add(curr);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return allRooms;
+    }
+
+    public void insertCustomer(Customer customer, Boolean b, String password, String Name,
+                               int Age, String Address) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO customer VALUES (?,?,?,?)");
+            ps.setString(1, customer.getCreditCard());
+            ps.setString(2, customer.getEmail());
+            ps.setString(3, customer.getAccount());
+            ps.setInt(4, customer.getPaymentID());
+            ps.executeUpdate();
+            connection.commit();
+            ps.close();
+            PreparedStatement ps1 = connection.prepareStatement("INSERT INTO CustomerDetails VALUES (?,?,?,?)");
+            ps1.setString(1, customer.getEmail());
+            ps1.setString(2, Name);
+            ps1.setInt(3, Age);
+            ps1.setString(4,Address);
+            ps1.executeUpdate();
+            connection.commit();
+            ps.close();
+            if (b) {
+                insertMember(customer);
+            } else {
+                insertNonmember(customer);
+            }
+            insertAccount(customer, password);
+        } catch (SQLException e) {
+            System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+            rollbackConnection();
+        }
+    }
+
+    private void insertMember(Customer customer) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO HotelMember VALUES (?,?,?,?, ?)");
+            ps.setString(1, customer.getCreditCard());
+            ps.setString(2, customer.getEmail());
+            ps.setString(3, customer.getAccount());
+            ps.setInt(4, customer.getPaymentID());
+            ps.setInt(5, 0);
+            ps.executeUpdate();
+            connection.commit();
+            ps.close();
+        } catch (SQLException e) {
+            System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+            rollbackConnection();
+        }
+    }
+
+    private void insertNonmember(Customer customer) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO NonMember VALUES (?,?,?,?, ?)");
+            ps.setString(1, customer.getCreditCard());
+            ps.setString(2, customer.getEmail());
+            ps.setString(3, customer.getAccount());
+            ps.setInt(4, customer.getPaymentID());
+            ps.executeUpdate();
+            connection.commit();
+            ps.close();
+        } catch (SQLException e) {
+            System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+            rollbackConnection();
+        }
+    }
+
+    private void insertAccount(Customer customer, String password) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO account VALUES (?,?,?)");
+            ps.setString(1, customer.getAccount());
+            ps.setString(2, password);
+            ps.setString(3, customer.getCreditCard());
+            ps.executeUpdate();
+            connection.commit();
+            ps.close();
+        } catch (SQLException e) {
+            System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+            rollbackConnection();
+        }
+    }
+
+    public int getRateForRoom(int roomNum) {
+
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("SELECT Rate FROM Room WHERE Room_Number = " + roomNum);
+            return resultSet.getInt("Rate");
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return 0;
     }
 
 

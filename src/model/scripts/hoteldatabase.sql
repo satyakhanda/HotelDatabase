@@ -57,7 +57,7 @@ grant select on CustomerDetails to public;
 CREATE TABLE Booking (
 	BookingID int,
 	StartDate Date NOT NULL,
-	EndDate Date NOT NULL,
+	EndDate Date,
 	SizeOfParty int NOT NULL,
 	PRIMARY KEY (BookingID)
 );
