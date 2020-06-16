@@ -72,9 +72,9 @@ public class DatabaseConnectionHandler {
             sr.runScript(reader);
 
             //getEmployees();
-            Customer c = new NonMember("1234567891113434", "dave@gmail.com", "dave123", 100);
-
-            getBooking(c);
+//            Customer c = new NonMember("1234567891113434", "dave@gmail.com", "dave123", 100);
+//
+//            getBooking(c);
 
 
             return true;
@@ -105,17 +105,19 @@ public class DatabaseConnectionHandler {
         }
     }
 
-    public Account getAccount(Customer cus) {
+    public Customer getCustomer(String username, String password) {
         try {
             Statement stmt = connection.createStatement();
-            ResultSet resultSet = stmt.executeQuery("SELECT * " +
-                    "FROM account " +
-                    "WHERE creditCard = " + cus.getCreditCard());
-            Account custAccount = null;
+            ResultSet resultSet = stmt.executeQuery("SELECT c.CreditCard, c.Account, c.Email, m.Points " +
+                    "FROM account a, customer c, hotelMember m " +
+                    "WHERE username = " + username + " AND password = " + password + " AND c.account = " + username +
+                    " AND m.creditCard = c.creditCard ");
+            Customer custAccount = null;
             while(resultSet.next()) {
-                custAccount = new Account(resultSet.getString("Username"),
-                        resultSet.getString("Password"),
-                        resultSet.getString("CreditCard"));
+                custAccount = new Member(resultSet.getString("CrediCard"),
+                        resultSet.getString("Email"),
+                        resultSet.getString("Account"), 0,
+                        resultSet.getInt("Points"));
             }
             resultSet.close();
             stmt.close();
