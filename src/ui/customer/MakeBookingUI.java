@@ -29,6 +29,7 @@ public class MakeBookingUI extends javax.swing.JFrame {
         fillTable();
     }
 
+    //TODO: MANRAJ
     //TODO: fill JTable with available bookings
     private void fillTable() {
     }
@@ -179,6 +180,7 @@ public class MakeBookingUI extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    //TODO: SATYAK
     //TODO: this should make a booking object from the stuff entered in JTextFields and then insert it
     private void makeBookingActionPerformed(java.awt.event.ActionEvent evt) {
 //        Booking newBooking = new Booking(5, new Date()); // THIS LINE IS THE MAIN ONE THAT NEEDS TO BE DONE

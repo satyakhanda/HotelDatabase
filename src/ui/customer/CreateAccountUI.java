@@ -167,6 +167,7 @@ public class CreateAccountUI extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    //TODO: CHRIS
     //TODO: make sure it correctly inserts a customer and account with parameters coming from JTextFields
     private void makeAccountActionPerformed(java.awt.event.ActionEvent evt) {
         Customer newCust = new NonMember(creditCardNum.getText(),

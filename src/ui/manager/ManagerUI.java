@@ -80,6 +80,7 @@ public class ManagerUI extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    //TODO: CHRIS
     //TODO: should check that entered empID exists among a manager, and then call HotelManagerUI with that manager as a parameter
     private void submitEmpIDActionPerformed(java.awt.event.ActionEvent evt) {
         String empID = enteredEmpID.getText();

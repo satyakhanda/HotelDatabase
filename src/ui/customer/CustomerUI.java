@@ -105,6 +105,7 @@ public class CustomerUI extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    //TODO: CHRIS
     //TODO: this should get customer from table that has this username and password, if none exists, set username and password fields to empty
     private void loginActionPerformed(java.awt.event.ActionEvent evt) {
         Customer curr = dbHandler.getCustomer(username.getText(), password.getPassword().toString());

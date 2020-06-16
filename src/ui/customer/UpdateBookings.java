@@ -3,13 +3,15 @@ package ui.customer;
 import database.DatabaseConnectionHandler;
 import model.customers.Customer;
 
+import java.awt.event.ActionEvent;
+
 public class UpdateBookings extends javax.swing.JFrame {
     private javax.swing.JButton cancelBooking;
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton updateBooking;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JTable jTable1; 
     private javax.swing.JTextField jTextField1;
 
     private DatabaseConnectionHandler dbHandler;
@@ -19,6 +21,11 @@ public class UpdateBookings extends javax.swing.JFrame {
         this.dbHandler = dbHandler;
         this.customer = customer;
         initComponents();
+        fillTable();
+    }
+
+    //TODO: MANRAJ
+    private void fillTable() {
     }
 
     /**
@@ -33,7 +40,7 @@ public class UpdateBookings extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
-        jButton1 = new javax.swing.JButton();
+        updateBooking = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
         cancelBooking = new javax.swing.JButton();
@@ -63,13 +70,23 @@ public class UpdateBookings extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(jTable1);
 
-        jButton1.setText("Update Booking");
+        updateBooking.setText("Update Booking");
+        updateBooking.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                updateBookingActionPerformed(evt);
+            }
+        });
 
         jLabel2.setText("New End Date:");
 
         jTextField1.setText("YYYY-MM-DD");
 
         cancelBooking.setText("Cancel Booking");
+        cancelBooking.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancelBookingActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -89,7 +106,7 @@ public class UpdateBookings extends javax.swing.JFrame {
                                 .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(updateBooking, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(cancelBooking, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))))
                 .addContainerGap(15, Short.MAX_VALUE))
         );
@@ -102,7 +119,7 @@ public class UpdateBookings extends javax.swing.JFrame {
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
+                    .addComponent(updateBooking)
                     .addComponent(jLabel2)
                     .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -112,5 +129,14 @@ public class UpdateBookings extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+
+    //TODO: SATYAK
+    private void updateBookingActionPerformed(ActionEvent evt) {
+    }
+
+    //TODO: SATYAK
+    private void cancelBookingActionPerformed(ActionEvent evt) {
+    }
 
 }

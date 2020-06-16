@@ -13,6 +13,7 @@ public class BookingConfirmation extends javax.swing.JFrame {
         makePayment(customer, price, dbHandler);
     }
 
+    //TODO: SATYAK
     //TODO: call make payment and set text of JLabel rate to amount paid
     public void makePayment(Customer customer, int price, DatabaseConnectionHandler dbHandler) {
 
