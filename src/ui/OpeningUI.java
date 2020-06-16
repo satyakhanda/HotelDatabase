@@ -6,10 +6,6 @@ import ui.manager.ManagerUI;
 
 import java.awt.event.ActionEvent;
 
-/**
- *
- * @author ManrajSaran
- */
 public class OpeningUI extends javax.swing.JFrame {
     private javax.swing.JButton custButton;
     private javax.swing.JLabel jLabel1;

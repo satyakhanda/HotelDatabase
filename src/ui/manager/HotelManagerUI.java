@@ -5,7 +5,7 @@ import model.employees.Employee;
 
 public class HotelManagerUI extends javax.swing.JFrame {
     private javax.swing.JButton displayRoomButton;
-    private javax.swing.JButton displyEmpButton;
+    private javax.swing.JButton displayEmpButton;
 
     private Employee manager;
     private DatabaseConnectionHandler dbHandler;
@@ -25,15 +25,15 @@ public class HotelManagerUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        displyEmpButton = new javax.swing.JButton();
+        displayEmpButton = new javax.swing.JButton();
         displayRoomButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        displyEmpButton.setText("Display Cleaners");
-        displyEmpButton.addActionListener(new java.awt.event.ActionListener() {
+        displayEmpButton.setText("Display Cleaners");
+        displayEmpButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                displyEmpButtonActionPerformed(evt);
+                displayEmpButtonActionPerformed(evt);
             }
         });
 
@@ -50,7 +50,7 @@ public class HotelManagerUI extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap(26, Short.MAX_VALUE)
-                .addComponent(displyEmpButton)
+                .addComponent(displayEmpButton)
                 .addGap(29, 29, 29)
                 .addComponent(displayRoomButton)
                 .addGap(38, 38, 38))
@@ -60,7 +60,7 @@ public class HotelManagerUI extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(23, 23, 23)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(displyEmpButton)
+                    .addComponent(displayEmpButton)
                     .addComponent(displayRoomButton))
                 .addContainerGap(17, Short.MAX_VALUE))
         );
@@ -68,7 +68,7 @@ public class HotelManagerUI extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void displyEmpButtonActionPerformed(java.awt.event.ActionEvent evt) {
+    private void displayEmpButtonActionPerformed(java.awt.event.ActionEvent evt) {
         java.awt.EventQueue.invokeLater(() -> new DisplayCleaners(dbHandler.getCleanersForHotel(manager.getHotelID())).setVisible(true));
     }
 
