@@ -69,7 +69,7 @@ public class HotelManagerUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void displayEmpButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        java.awt.EventQueue.invokeLater(() -> new DisplayCleaners(dbHandler.getCleanersForHotel(manager.getHotelID())).setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new ChooseDisplayCleaners(manager, dbHandler).setVisible(true));
     }
 
     private void displayRoomButtonActionPerformed(java.awt.event.ActionEvent evt) {

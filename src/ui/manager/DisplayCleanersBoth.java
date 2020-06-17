@@ -5,21 +5,21 @@ import model.employees.Cleaner;
 import javax.swing.table.DefaultTableModel;
 import java.util.List;
 
-public class DisplayCleaners extends javax.swing.JFrame {
+public class DisplayCleanersBoth extends javax.swing.JFrame {
     private javax.swing.JTable cleanerTable;
     private javax.swing.JScrollPane jScrollPane1;
 
     private List<Cleaner> cleaners;
 
-    public DisplayCleaners(List<Cleaner> cleaners) {
+    public DisplayCleanersBoth(List<Cleaner> cleaners) {
         this.cleaners = cleaners;
         initComponents();
-        fillTable();
+        fillTableNameAndID();
     }
 
     //TODO: MANRAJ
     //TODO: Fill JTable with cleaners from list
-    private void fillTable() {
+    private void fillTableNameAndID() {
         DefaultTableModel model = (DefaultTableModel) this.cleanerTable.getModel();
         model.setRowCount(0);
         for (Cleaner curr : cleaners) {

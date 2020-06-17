@@ -55,10 +55,6 @@ public class DisplayRooms extends javax.swing.JFrame {
     private void fillTableCleanedAll() {
         DefaultTableModel model = (DefaultTableModel) this.cleanedAll.getModel();
         model.setRowCount(0);
-//        List<Room> byAll = dbHandler.bookedByAll();
-//        for (Room curr : byAll) {
-//            model.addRow(new Object[] {curr.getRoom_num(), curr.getRate()});
-//        }
         List<Cleaner> cleaners = dbHandler.cleanedAllBooked();
         for (Cleaner curr : cleaners) {
             model.addRow(new Object[] {curr.getEmployeeName(), curr.getEmployeeID()});

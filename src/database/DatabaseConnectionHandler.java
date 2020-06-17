@@ -154,33 +154,6 @@ public class DatabaseConnectionHandler {
         return null;
     }
 
-    public List<Room> bookedByAll() {
-        List<Room> allRooms = new ArrayList<>();
-        try {
-            Statement stmt = connection.createStatement();
-            ResultSet resultSet = stmt.executeQuery("SELECT * " +
-                    "FROM Room r " +
-                    "WHERE NOT EXISTS" +
-                    " ((SELECT c1.creditCard FROM customer c1)" +
-                    " MINUS" +
-                    " (SELECT c2.creditCard FROM customerBooking c2, booking b" +
-                    " WHERE c2.bookingID = b.bookingID AND r.bookingID = b.bookingID))");
-
-            while(resultSet.next()) {
-                Room curr = new Room(resultSet.getInt("Room_Number"),
-                        resultSet.getString("Room_Date"),
-                        resultSet.getInt("Rate"),
-                        resultSet.getInt("BookingID"));
-                allRooms.add(curr);
-            }
-            resultSet.close();
-            stmt.close();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return allRooms;
-    }
-
     public List<Cleaner> cleanedAllBooked() {
         List<Cleaner> allCleaners = new ArrayList<>();
         try {
