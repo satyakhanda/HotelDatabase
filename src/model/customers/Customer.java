@@ -23,5 +23,7 @@ public abstract class Customer {
 
     public abstract void makePayment();
 
-    
+    public void setPaymentID(Integer paymentID) {
+        this.paymentID = paymentID;
+    }
 }

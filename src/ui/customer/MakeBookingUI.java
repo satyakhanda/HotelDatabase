@@ -6,9 +6,7 @@ import model.amenities.Room;
 import model.customers.Customer;
 
 import javax.swing.table.DefaultTableModel;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -206,7 +204,7 @@ public class MakeBookingUI extends javax.swing.JFrame {
             String finalDate = dateUntil.getText();
             //Date startDate = formatter.parse(initialDate);
             //Date endDate = formatter.parse(finalDate);
-            Booking newBooking = new Booking(1+ dbHandler.getBookingID(), initialDate, finalDate, Integer.parseInt(sizeOfParty.getText())); // THIS LINE IS THE MAIN ONE THAT NEEDS TO BE DONE
+            Booking newBooking = new Booking(1+ dbHandler.getMaxBookingID(), initialDate, finalDate, Integer.parseInt(sizeOfParty.getText())); // THIS LINE IS THE MAIN ONE THAT NEEDS TO BE DONE
             dbHandler.insertBooking(newBooking, curr, Integer.parseInt(roomNum.getText()));
             java.awt.EventQueue.invokeLater(() -> new BookingConfirmation(dbHandler.getRateForRoom(Integer.parseInt(roomNum.getText())), curr, dbHandler).setVisible(true));
 //        } catch (ParseException e) {
