@@ -55,7 +55,7 @@ public class UpdateBookings extends javax.swing.JFrame {
         jTextField1 = new javax.swing.JTextField();
         cancelBooking = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jLabel1.setText("Your Booking");
 
@@ -143,10 +143,10 @@ public class UpdateBookings extends javax.swing.JFrame {
 
     //TODO: SATYAK
     private void updateBookingActionPerformed(ActionEvent evt) {
-        java.sql.Date endDate = java.sql.Date.valueOf(jTextField1.toString());
+        java.sql.Date endDate = java.sql.Date.valueOf(jTextField1.getText());
         String creditCard = this.customer.getCreditCard();
         int bookingID = booking.getBookingID();
-        dbHandler.updateBooking(creditCard, bookingID, endDate);
+        dbHandler.updateBooking(creditCard, bookingID, jTextField1.getText());
        // fillTable();
     }
 

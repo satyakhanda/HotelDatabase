@@ -4,11 +4,11 @@ import java.util.Date;
 
 public class Booking {
     private int bookingID;
-    private Date startDate;
-    private Date endDate;
+    private String startDate;
+    private String endDate;
     private int sizeOfParty;
 
-    public Booking(int bookingID, Date startDate, Date endDate, int sizeOfParty) {
+    public Booking(int bookingID, String startDate, String endDate, int sizeOfParty) {
         this.bookingID = bookingID;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -19,11 +19,11 @@ public class Booking {
         return this.bookingID;
     }
 
-    public Date getStartDate() {
+    public String getStartDate() {
         return this.startDate;
     }
 
-    public Date getEndDate() {
+    public String getEndDate() {
         return this.endDate;
     }
 

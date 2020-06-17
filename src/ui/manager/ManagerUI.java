@@ -4,6 +4,7 @@ import database.DatabaseConnectionHandler;
 import model.employees.Employee;
 import model.employees.Manager;
 
+import javax.swing.*;
 import java.util.List;
 
 public class ManagerUI extends javax.swing.JFrame {
@@ -39,7 +40,7 @@ public class ManagerUI extends javax.swing.JFrame {
         jTextArea1.setRows(5);
         jScrollPane1.setViewportView(jTextArea1);
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
         jLabel1.setText("Please enter your EmployeeID");
 
@@ -89,6 +90,7 @@ public class ManagerUI extends javax.swing.JFrame {
         for (Manager m : managers) {
             if (m.getEmployeeID() == Integer.parseInt(empID)) {
                 java.awt.EventQueue.invokeLater(() -> new HotelManagerUI(m, dbHandler).setVisible(true));
+                this.setVisible(false);
             }
         }
         enteredEmpID.setText("");

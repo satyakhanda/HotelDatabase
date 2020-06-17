@@ -4,9 +4,9 @@ public abstract class Customer {
     private String creditCard;
     private String email;
     private String account;
-    private int paymentID;
+    private Integer paymentID;
 
-    public Customer(String creditCard, String email, String account, int paymentId) {
+    public Customer(String creditCard, String email, String account, Integer paymentId) {
         this.creditCard = creditCard;
         this.email = email;
         this.account = account;
@@ -19,7 +19,7 @@ public abstract class Customer {
 
     public String getAccount() {return this.account;}
 
-    public int getPaymentID() {return this.paymentID;}
+    public Integer getPaymentID() {return this.paymentID;}
 
     public abstract void makePayment();
 

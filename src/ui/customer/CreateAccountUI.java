@@ -56,7 +56,7 @@ public class CreateAccountUI extends javax.swing.JFrame {
         creditCardNum = new javax.swing.JTextField();
         makeAccount = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jLabel1.setFont(new java.awt.Font("Lucida Grande", 0, 18)); // NOI18N
         jLabel1.setText("                Create Your Account");
@@ -173,7 +173,7 @@ public class CreateAccountUI extends javax.swing.JFrame {
         Customer newCust = new NonMember(creditCardNum.getText(),
                                         email.getText(),
                                         username.getText(),
-                                        0);
+                                        null);
         String temp = new String(password.getPassword());
         dbHandler.insertCustomer(newCust, false, temp, fullName.getText(), Integer.parseInt(age.getText()), address.getText());
         java.awt.EventQueue.invokeLater(() -> new MakeBookingUI(newCust, dbHandler).setVisible(true));

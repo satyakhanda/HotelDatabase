@@ -64,7 +64,7 @@ public class DatabaseConnectionHandler {
                 connection.close();
             }
 
-            connection = DriverManager.getConnection(ORACLE_URL, "ora_cknee", "a43745280");
+            connection = DriverManager.getConnection(ORACLE_URL, "ora_name88", "a43457738");
             connection.setAutoCommit(false);
 
             System.out.println("\nConnected to Oracle!");
@@ -166,7 +166,7 @@ public class DatabaseConnectionHandler {
 
             while(resultSet.next()) {
                 Room curr = new Room(resultSet.getInt("Room_Number"),
-                        resultSet.getDate("Room_Date"),
+                        resultSet.getString("Room_Date"),
                         resultSet.getInt("Rate"),
                         resultSet.getInt("BookingID"));
                 allRooms.add(curr);
@@ -209,8 +209,10 @@ public class DatabaseConnectionHandler {
             try {
                 PreparedStatement ps = connection.prepareStatement("INSERT INTO booking VALUES (?,?,?,?)");
                 ps.setInt(1, booking.getBookingID());
-                java.sql.Date startDate = java.sql.Date.valueOf(booking.getStartDate().toString());
-                java.sql.Date endDate = java.sql.Date.valueOf(booking.getEndDate().toString());
+                String initDate = booking.getStartDate();
+                String finDate = booking.getEndDate();
+                java.sql.Date startDate = java.sql.Date.valueOf(initDate);
+                java.sql.Date endDate = java.sql.Date.valueOf(finDate);
                 ps.setDate(2, startDate);
                 ps.setDate(3, endDate);
                 ps.setInt(4, booking.getSizeOfParty());
@@ -240,7 +242,7 @@ public class DatabaseConnectionHandler {
         }
     }
 
-    public void updateBooking(String creditCard, int bookingId, java.sql.Date endDate) {
+    public void updateBooking(String creditCard, int bookingId, String endDate) {
         try {
             if (endDate == null) {
                 cancelBooking(creditCard, bookingId, endDate);
@@ -270,7 +272,7 @@ public class DatabaseConnectionHandler {
         }
     }
 
-    public void cancelBooking(String creditCard, int bookingId, java.util.Date endDate) {
+    public void cancelBooking(String creditCard, int bookingId, String endDate) {
         try {
             Statement stmt = connection.createStatement();
             String query = "DELETE Booking b WHERE b.bookingId = " + bookingId;
@@ -311,6 +313,7 @@ public class DatabaseConnectionHandler {
                         customer.getAccount(), customer.getPaymentID());
                 finalPayment = makePaymentNonMember(nm);
             }
+            if (finalPayment == -1.0 ) System.out.println("Messed up in Non mem");
             return finalPayment;
         } catch (SQLException e) {
             System.out.println(EXCEPTION_TAG + " " + e.getMessage());
@@ -323,7 +326,7 @@ public class DatabaseConnectionHandler {
         try {
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT  * from payment p " +
-                    "WHERE p.PaymentID = " + nm.getCreditCard());
+                    "WHERE p.PaymentID = " + nm.getPaymentID());
             while (rs.next()) {
                 Payment payment = new Payment(String.valueOf(rs.getInt("PaymentID")),
                         rs.getFloat("RoomCost"), rs.getFloat("AdditionalCosts"));
@@ -349,7 +352,7 @@ public class DatabaseConnectionHandler {
         try {
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT  * from payment p " +
-                    "WHERE p.PaymentID = " + m.getCreditCard());
+                    "WHERE p.PaymentID = " + m.getPaymentID());
             while (rs.next()) {
                 Payment payment = new Payment(String.valueOf(rs.getInt("PaymentID")),
                         rs.getFloat("RoomCost"), rs.getFloat("AdditionalCosts"));
@@ -449,12 +452,12 @@ public class DatabaseConnectionHandler {
 
         try {
             Statement stmt = connection.createStatement();
-            ResultSet resultSet = stmt.executeQuery("SELECT h.HotelID, AVG(b.SizeOfParty) " +
+            ResultSet resultSet = stmt.executeQuery("SELECT h.HotelID, AVG(b.SizeOfParty) AS SizeOfParty " +
                     "FROM CustomerBooking cb, Booking b, HotelHasBooking h " +
                     "WHERE b.BookingID = h.BookingID AND cb.BookingID = b.BookingID " +
                     "GROUP BY h.HotelID");
             while(resultSet.next()) {
-                partySizes.put(resultSet.getInt("HotelID"), resultSet.getInt("AVG(SizeOfParty)"));
+                partySizes.put(resultSet.getInt("HotelID"), resultSet.getInt("SizeOfParty"));
             }
             resultSet.close();
             stmt.close();
@@ -464,8 +467,26 @@ public class DatabaseConnectionHandler {
         return partySizes;
     }
 
-    public HashMap<String, Room> getAvailableRooms() {
-        HashMap<String, Room> hotelNameAndRooms = new HashMap<>();
+    public int getBookingID() {
+        int bookingIDs = 0;
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("SELECT MAX(BookingID) AS BookingID " +
+                    "FROM Booking b");
+            while(resultSet.next()) {
+                bookingIDs = (resultSet.getInt("BookingID"));
+            }
+            resultSet.close();
+            stmt.close();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return bookingIDs;
+    }
+
+    public HashMap<String, List<Room>> getAvailableRooms() {
+        HashMap<String, List<Room>> hotelNameAndRooms = new HashMap<>();
         try {
             Statement stmt = connection.createStatement();
             ResultSet resultSet = stmt.executeQuery("SELECT r.Room_Number, r.Room_Date, r.Rate, r.BookingID, h.HotelName " +
@@ -475,11 +496,13 @@ public class DatabaseConnectionHandler {
                     "(b.EndDate < current_date))) " +
                     "ORDER BY r.Rate");
             while(resultSet.next()) {
+                List<Room> rooms = hotelNameAndRooms.getOrDefault(resultSet.getString("HotelName"), new ArrayList<>());
                 Room curr = new Room(resultSet.getInt("Room_Number"),
-                        new java.util.Date(resultSet.getString("Room_Date")),
+                        resultSet.getString("Room_Date"),
                         resultSet.getInt("Rate"),
                         resultSet.getInt("BookingID"));
-                hotelNameAndRooms.put(resultSet.getString("HotelName"),curr);
+                rooms.add(curr);
+                hotelNameAndRooms.put(resultSet.getString("HotelName"), rooms);
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -497,7 +520,7 @@ public class DatabaseConnectionHandler {
                     "ORDER BY r.Rate");
             while(resultSet.next()) {
                 Room curr = new Room(resultSet.getInt("Room_Number"),
-                        new java.util.Date(resultSet.getString("Room_Date")),
+                        resultSet.getString("Room_Date"),
                         resultSet.getInt("Rate"),
                         resultSet.getInt("BookingID"));
                 allRooms.add(curr);
@@ -511,14 +534,14 @@ public class DatabaseConnectionHandler {
     public void insertCustomer(Customer customer, Boolean b, String password, String Name,
                                int Age, String Address) {
         try {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO customer VALUES (?,?,?,?)");
-            ps.setString(1, customer.getCreditCard());
-            ps.setString(2, customer.getEmail());
-            ps.setString(3, customer.getAccount());
-            ps.setInt(4, customer.getPaymentID());
-            ps.executeUpdate();
-            connection.commit();
-            ps.close();
+//            PreparedStatement ps = connection.prepareStatement("INSERT INTO customer VALUES (?,?,?,?)");
+//            ps.setString(1, customer.getCreditCard());
+//            ps.setString(2, customer.getEmail());
+//            ps.setString(3, customer.getAccount());
+//            ps.setInt(4, customer.getPaymentID());
+//            ps.executeUpdate();
+//            connection.commit();
+//            ps.close();
             PreparedStatement ps1 = connection.prepareStatement("INSERT INTO CustomerDetails VALUES (?,?,?,?)");
             ps1.setString(1, customer.getEmail());
             ps1.setString(2, Name);
@@ -526,13 +549,26 @@ public class DatabaseConnectionHandler {
             ps1.setString(4,Address);
             ps1.executeUpdate();
             connection.commit();
+            ps1.close();
+            insertAccount(customer, password);
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO customer VALUES (?,?,?,?)");
+            ps.setString(1, customer.getCreditCard());
+            ps.setString(2, customer.getEmail());
+            ps.setString(3, customer.getAccount());
+            if (customer.getPaymentID() == null) {
+                ps.setNull(4, Types.NULL);
+            } else {
+                ps.setInt(4, customer.getPaymentID());
+            }
+            ps.executeUpdate();
+            connection.commit();
             ps.close();
             if (b) {
                 insertMember(customer);
             } else {
                 insertNonmember(customer);
             }
-            insertAccount(customer, password);
+            //insertAccount(customer, password);
         } catch (SQLException e) {
             System.out.println(EXCEPTION_TAG + " " + e.getMessage());
             rollbackConnection();
@@ -545,7 +581,11 @@ public class DatabaseConnectionHandler {
             ps.setString(1, customer.getCreditCard());
             ps.setString(2, customer.getEmail());
             ps.setString(3, customer.getAccount());
-            ps.setInt(4, customer.getPaymentID());
+            if (customer.getPaymentID() == null) {
+                ps.setNull(4, Types.NULL);
+            } else {
+                ps.setInt(4, customer.getPaymentID());
+            }
             ps.setInt(5, 0);
             ps.executeUpdate();
             connection.commit();
@@ -562,7 +602,11 @@ public class DatabaseConnectionHandler {
             ps.setString(1, customer.getCreditCard());
             ps.setString(2, customer.getEmail());
             ps.setString(3, customer.getAccount());
-            ps.setInt(4, customer.getPaymentID());
+            if (customer.getPaymentID() == null) {
+                ps.setNull(4, Types.NULL);
+            } else {
+                ps.setInt(4, customer.getPaymentID());
+            }
             ps.executeUpdate();
             connection.commit();
             ps.close();
@@ -592,7 +636,9 @@ public class DatabaseConnectionHandler {
         try {
             Statement stmt = connection.createStatement();
             ResultSet resultSet = stmt.executeQuery("SELECT Rate FROM Room WHERE Room_Number = " + roomNum);
-            return resultSet.getInt("Rate");
+            while (resultSet.next()) {
+                return resultSet.getInt("Rate");
+            }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

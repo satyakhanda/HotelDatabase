@@ -18,9 +18,10 @@ public class BookingConfirmation extends javax.swing.JFrame {
     //TODO: SATYAK
     //TODO: call make payment and set text of JLabel rate to amount paid
     public void makePayment(Customer customer, DatabaseConnectionHandler dbHandler) {
-        JLabel lblTemp = new JLabel("");
-        lblTemp.setText(String.valueOf(dbHandler.makePayment(customer)));
-        rate = lblTemp;
+        //JLabel lblTemp = new JLabel("");
+        rate.setText("$ " + (dbHandler.makePayment(customer)));
+        //rate = lblTemp;
+
     }
 
     /**
@@ -36,7 +37,7 @@ public class BookingConfirmation extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         rate = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jLabel1.setText("Thank you, the following will be charged to your credit card:");
 

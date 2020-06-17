@@ -4,11 +4,11 @@ import java.util.Date;
 
 public class Room {
     private int room_num;
-    private Date date;
+    private String date;
     private int rate;
     private int booking;
 
-    public Room(int room_num, Date date, int rate, int booking) {
+    public Room(int room_num, String date, int rate, int booking) {
         this.booking = booking;
         this.date = date;
         this.rate = rate;
@@ -19,7 +19,7 @@ public class Room {
         return room_num;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 
