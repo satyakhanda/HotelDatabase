@@ -1,6 +1,8 @@
 package ui.manager;
 
 import model.employees.Cleaner;
+
+import javax.swing.table.DefaultTableModel;
 import java.util.List;
 
 public class DisplayCleaners extends javax.swing.JFrame {
@@ -18,6 +20,11 @@ public class DisplayCleaners extends javax.swing.JFrame {
     //TODO: MANRAJ
     //TODO: Fill JTable with cleaners from list
     private void fillTable() {
+        DefaultTableModel model = (DefaultTableModel) this.cleanerTable.getModel();
+        model.setRowCount(0);
+        for (Cleaner curr : cleaners) {
+            model.addRow(new Object[] {curr.getEmployeeID(), curr.getEmployeeName()});
+        }
     }
 
     /**

@@ -174,7 +174,8 @@ public class CreateAccountUI extends javax.swing.JFrame {
                                         email.getText(),
                                         username.getText(),
                                         0);
-        dbHandler.insertCustomer(newCust, false, password.getPassword().toString(), fullName.getText(), Integer.parseInt(age.getText()), address.getText());
+        String temp = new String(password.getPassword());
+        dbHandler.insertCustomer(newCust, false, temp, fullName.getText(), Integer.parseInt(age.getText()), address.getText());
         java.awt.EventQueue.invokeLater(() -> new MakeBookingUI(newCust, dbHandler).setVisible(true));
     }
 }

@@ -6,6 +6,7 @@ import model.customers.*;
 import model.employees.Cleaner;
 import model.employees.Employee;
 
+import java.awt.print.Book;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -81,34 +82,63 @@ public class DatabaseConnectionHandler {
 
 
 
-    public void getBooking(Customer cus) {
+    public List<List<Object>> getBooking(Customer cus) {
+        List<List<Object>> retList = new ArrayList<>();
         try {
             Statement stmt = connection.createStatement();
             ResultSet resultSet = stmt.executeQuery("SELECT c.bookingID, r.room_number, b.SizeOfParty " +
                     "FROM customerBooking c, Booking b, Room r " +
                     "WHERE c.creditCard = " + cus.getCreditCard() + " AND " +
                     "c.bookingID = b.bookingID AND r.bookingID = b.bookingID");
-
             while(resultSet.next()) {
-                System.out.println(resultSet.getString("bookingID"));
+                List<Object> temp = new ArrayList<Object>();
+                temp.add(resultSet.getInt("BookingID"));
+                temp.add(resultSet.getInt("Room_Number"));
+                temp.add(resultSet.getInt("SizeOfParty"));
+                retList.add(temp);
             }
             resultSet.close();
             stmt.close();
+            return retList;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+        return retList;
     }
+
+//    public Customer getCustomer(String username, String password) {
+//        try {
+//            Statement stmt = connection.createStatement();
+//            ResultSet resultSet = stmt.executeQuery("SELECT c.CreditCard, c.Account, c.Email, m.Points " +
+//                    "FROM account a, customer c, hotelMember m " +
+//                    "WHERE username = " + username + " AND password = " + password + " AND c.account = " + username +
+//                    " AND m.creditCard = c.creditCard ");
+//            Customer custAccount = null;
+//            while(resultSet.next()) {
+//                custAccount = new Member(resultSet.getString("CrediCard"),
+//                        resultSet.getString("Email"),
+//                        resultSet.getString("Account"), 0,
+//                        resultSet.getInt("Points"));
+//            }
+//            resultSet.close();
+//            stmt.close();
+//            return custAccount;
+//        } catch (SQLException throwables) {
+//            throwables.printStackTrace();
+//        }
+//        return null;
+//    }
 
     public Customer getCustomer(String username, String password) {
         try {
             Statement stmt = connection.createStatement();
             ResultSet resultSet = stmt.executeQuery("SELECT c.CreditCard, c.Account, c.Email, m.Points " +
                     "FROM account a, customer c, hotelMember m " +
-                    "WHERE username = " + username + " AND password = " + password + " AND c.account = " + username +
-                    " AND m.creditCard = c.creditCard ");
+                    "WHERE a.username = '" + username + "' AND a.password = '" + password + "' AND c.account = '" + username +
+                    "' AND m.creditCard = c.creditCard ");
             Customer custAccount = null;
             while(resultSet.next()) {
-                custAccount = new Member(resultSet.getString("CrediCard"),
+                custAccount = new Member(resultSet.getString("CreditCard"),
                         resultSet.getString("Email"),
                         resultSet.getString("Account"), 0,
                         resultSet.getInt("Points"));
@@ -174,7 +204,7 @@ public class DatabaseConnectionHandler {
         return allRooms;
     }
 
-    public void insertBooking(Booking booking, Customer customer, Room room) {
+    public void insertBooking(Booking booking, Customer customer, int roomNum) {
         try {
             try {
                 PreparedStatement ps = connection.prepareStatement("INSERT INTO booking VALUES (?,?,?,?)");
@@ -189,7 +219,7 @@ public class DatabaseConnectionHandler {
                 ps.close();
                 Statement stmt = connection.createStatement();
                 String query = "UPDATE Room r " + "SET endDate = " + endDate +
-                        "AND bookingID = " + booking.getBookingID() + "WHERE r.room_number = " + room.getRoom_num();
+                        "AND bookingID = " + booking.getBookingID() + "WHERE r.room_number = " + roomNum;
                 ResultSet rs = stmt.executeQuery(query);
                 rs.close();
             } catch (SQLException e) {
@@ -266,27 +296,30 @@ public class DatabaseConnectionHandler {
         }
     }
 
-    public void makePayment(Customer customer) {
+    public float makePayment(Customer customer) {
         try {
+            float finalPayment = 0;
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT  * from HotelMember m " +
                     "WHERE m.CreditCard = " + customer.getCreditCard());
             if (rs.next() != false) {
                 Member m = new Member(rs.getString("CreditCard"), customer.getEmail(),
                         customer.getAccount(), customer.getPaymentID(), rs.getInt("Points"));
-                makePaymentMember(m);
+                finalPayment = makePaymentMember(m);
             } else {
                 NonMember nm = new NonMember(customer.getCreditCard(), customer.getEmail(),
                         customer.getAccount(), customer.getPaymentID());
-                makePaymentNonMember(nm);
+                finalPayment = makePaymentNonMember(nm);
             }
+            return finalPayment;
         } catch (SQLException e) {
             System.out.println(EXCEPTION_TAG + " " + e.getMessage());
             rollbackConnection();
         }
+        return -1;
     }
 
-    private void makePaymentNonMember(NonMember nm) {
+    private float makePaymentNonMember(NonMember nm) {
         try {
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT  * from payment p " +
@@ -303,14 +336,16 @@ public class DatabaseConnectionHandler {
                 ResultSet rs4 = stmt.executeQuery("UPDATE customer c SET paymentID = " + null +
                         "WHERE creditcard = " + nm.getCreditCard());
                 stmt4.close();
+                return FinalPayment;
             }
         } catch (SQLException e) {
             System.out.println(EXCEPTION_TAG + " " + e.getMessage());
             rollbackConnection();
         }
+        return -1;
     }
 
-    private void makePaymentMember(Member m) {
+    private float makePaymentMember(Member m) {
         try {
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT  * from payment p " +
@@ -336,11 +371,13 @@ public class DatabaseConnectionHandler {
                 ResultSet rs4 = stmt.executeQuery("UPDATE customer c SET paymentID = " + null +
                         "WHERE creditcard = " + m.getCreditCard());
                 stmt4.close();
+                return FinalPayment;
             }
         } catch (SQLException e) {
             System.out.println(EXCEPTION_TAG + " " + e.getMessage());
             rollbackConnection();
         }
+        return -1;
     }
 
     public List<Employee> getEmployees() {
@@ -417,7 +454,7 @@ public class DatabaseConnectionHandler {
                     "WHERE b.BookingID = h.BookingID AND cb.BookingID = b.BookingID " +
                     "GROUP BY h.HotelID");
             while(resultSet.next()) {
-                partySizes.put(resultSet.getInt("h.HotelID"), resultSet.getInt("AVG(b.SizeOfParty)"));
+                partySizes.put(resultSet.getInt("HotelID"), resultSet.getInt("AVG(SizeOfParty)"));
             }
             resultSet.close();
             stmt.close();
@@ -433,13 +470,13 @@ public class DatabaseConnectionHandler {
             Statement stmt = connection.createStatement();
             ResultSet resultSet = stmt.executeQuery("SELECT r.Room_Number, r.Room_Date, r.Rate, r.BookingID, h.HotelName " +
                     "FROM Room r, Booking b, HotelHasBooking hb, Hotel h " +
-                    "WHERE r.BookingID IS NULL OR (r.BookingID = b.BookingID AND b.BookingID = hb.BookingID AND hb.HotelID = h.HotelID " +
+                    "WHERE r.BookingID IS NULL OR (r.BookingID = b.BookingID AND b.BookingID = hb.BookingID AND hb.HotelID = h.HotelID AND " +
                     "((b.StartDate > current_date) OR " +
                     "(b.EndDate < current_date))) " +
                     "ORDER BY r.Rate");
             while(resultSet.next()) {
                 Room curr = new Room(resultSet.getInt("Room_Number"),
-                        resultSet.getDate("Room_Date"),
+                        new java.util.Date(resultSet.getString("Room_Date")),
                         resultSet.getInt("Rate"),
                         resultSet.getInt("BookingID"));
                 hotelNameAndRooms.put(resultSet.getString("HotelName"),curr);
@@ -460,7 +497,7 @@ public class DatabaseConnectionHandler {
                     "ORDER BY r.Rate");
             while(resultSet.next()) {
                 Room curr = new Room(resultSet.getInt("Room_Number"),
-                        resultSet.getDate("Room_Date"),
+                        new java.util.Date(resultSet.getString("Room_Date")),
                         resultSet.getInt("Rate"),
                         resultSet.getInt("BookingID"));
                 allRooms.add(curr);

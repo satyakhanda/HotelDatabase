@@ -1,30 +1,57 @@
 package ui.manager;
 
+import database.DatabaseConnectionHandler;
 import model.amenities.Room;
 
+import javax.swing.table.DefaultTableModel;
+import java.util.HashMap;
 import java.util.List;
 
 public class DisplayRooms extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel avgNum;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTable jTable2;
+    private javax.swing.JTable allRooms;
+    private javax.swing.JTable bookedByAll;
 
     private List<Room> rooms;
+    private DatabaseConnectionHandler dbHandler;
 
-    public DisplayRooms(List<Room> roomsForHotel) {
+    public DisplayRooms(List<Room> roomsForHotel, DatabaseConnectionHandler dbHandler, int hotelID) {
+        this.dbHandler = dbHandler;
         this.rooms = roomsForHotel;
         initComponents();
-        fillTable();
+        fillTableAllRooms();
+        fillTableBookedByAll();
+        getAVGPartySize(hotelID);
+    }
+
+    private void getAVGPartySize(int hotelID) {
+        HashMap<Integer, Integer> partySizes = dbHandler.averagePartySizePerHotel();
+        avgNum.setText(partySizes.get(hotelID) + " people");
+
+    }
+
+    private void fillTableBookedByAll() {
+        DefaultTableModel model = (DefaultTableModel) this.bookedByAll.getModel();
+        model.setRowCount(0);
+        List<Room> byAll = dbHandler.bookedByAll();
+        for (Room curr : byAll) {
+            model.addRow(new Object[] {curr.getRoom_num(), curr.getRate()});
+        }
     }
 
     //TODO: MANRAJ
     //TODO: Fill JTable with rooms from list
-    private void fillTable() {
+    private void fillTableAllRooms() {
+        DefaultTableModel model = (DefaultTableModel) this.allRooms.getModel();
+        model.setRowCount(0);
+        for (Room curr : rooms) {
+            model.addRow(new Object[] {curr.getRoom_num(), curr.getRate()});
+        }
     }
 
     /**
@@ -37,17 +64,17 @@ public class DisplayRooms extends javax.swing.JFrame {
     private void initComponents() {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        allRooms = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        bookedByAll = new javax.swing.JTable();
         jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
+        avgNum = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        allRooms.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null},
                 {null, null},
@@ -66,13 +93,13 @@ public class DisplayRooms extends javax.swing.JFrame {
                 return types [columnIndex];
             }
         });
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(allRooms);
 
         jLabel1.setText("All Rooms:");
 
         jLabel2.setText("Rooms Booked By All Customers:");
 
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+        bookedByAll.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null},
                 {null, null},
@@ -91,11 +118,11 @@ public class DisplayRooms extends javax.swing.JFrame {
                 return types [columnIndex];
             }
         });
-        jScrollPane2.setViewportView(jTable2);
+        jScrollPane2.setViewportView(bookedByAll);
 
         jLabel3.setText("Your Hotel's Average Party Size:");
 
-        jLabel4.setText(" people");
+        avgNum.setText(" people");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -112,7 +139,7 @@ public class DisplayRooms extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addGap(18, 18, 18)
-                        .addComponent(jLabel4)))
+                        .addComponent(avgNum)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -129,7 +156,7 @@ public class DisplayRooms extends javax.swing.JFrame {
                 .addGap(26, 26, 26)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
-                    .addComponent(jLabel4))
+                    .addComponent(avgNum))
                 .addContainerGap(28, Short.MAX_VALUE))
         );
 

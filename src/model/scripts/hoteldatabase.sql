@@ -416,19 +416,19 @@ values ('4747927400119283');
 
 
 insert into HotelMember
-values ('9824829899091942', 11111111111);
+values ('9824829899091942', 1111);
 
 insert into HotelMember
 values ('1212444566840922', 0);
 
 insert into HotelMember
-values ('1018123819231234', 2222232);
+values ('1018123819231234', 222);
 
 insert into HotelMember
 values ('1957471130481273', 11);
 
 insert into HotelMember
-values ('7678476320841003', 223234);
+values ('7678476320841003', 22);
 
 
 insert into CustomerBooking

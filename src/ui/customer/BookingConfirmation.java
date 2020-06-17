@@ -3,6 +3,8 @@ package ui.customer;
 import database.DatabaseConnectionHandler;
 import model.customers.Customer;
 
+import javax.swing.*;
+
 public class BookingConfirmation extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -10,13 +12,15 @@ public class BookingConfirmation extends javax.swing.JFrame {
 
     public BookingConfirmation(int price, Customer customer, DatabaseConnectionHandler dbHandler) {
         initComponents();
-        makePayment(customer, price, dbHandler);
+        makePayment(customer, dbHandler);
     }
 
     //TODO: SATYAK
     //TODO: call make payment and set text of JLabel rate to amount paid
-    public void makePayment(Customer customer, int price, DatabaseConnectionHandler dbHandler) {
-
+    public void makePayment(Customer customer, DatabaseConnectionHandler dbHandler) {
+        JLabel lblTemp = new JLabel("");
+        lblTemp.setText(String.valueOf(dbHandler.makePayment(customer)));
+        rate = lblTemp;
     }
 
     /**

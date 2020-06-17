@@ -2,6 +2,7 @@ package ui.manager;
 
 import database.DatabaseConnectionHandler;
 import model.employees.Employee;
+import model.employees.Manager;
 
 import java.util.List;
 
@@ -84,10 +85,10 @@ public class ManagerUI extends javax.swing.JFrame {
     //TODO: should check that entered empID exists among a manager, and then call HotelManagerUI with that manager as a parameter
     private void submitEmpIDActionPerformed(java.awt.event.ActionEvent evt) {
         String empID = enteredEmpID.getText();
-        List<Employee> employees = dbHandler.getEmployees();
-        for (Employee e : employees) {
-            if (e.getEmployeeID() == Integer.parseInt(empID)) {
-                java.awt.EventQueue.invokeLater(() -> new HotelManagerUI(e, dbHandler).setVisible(true));
+        List<Manager> managers = dbHandler.getManagers();
+        for (Manager m : managers) {
+            if (m.getEmployeeID() == Integer.parseInt(empID)) {
+                java.awt.EventQueue.invokeLater(() -> new HotelManagerUI(m, dbHandler).setVisible(true));
             }
         }
         enteredEmpID.setText("");

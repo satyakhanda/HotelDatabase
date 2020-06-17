@@ -1,21 +1,25 @@
 package ui.customer;
 
 import database.DatabaseConnectionHandler;
+import model.amenities.Booking;
 import model.customers.Customer;
 
+import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
+import java.util.List;
 
 public class UpdateBookings extends javax.swing.JFrame {
-    private javax.swing.JButton cancelBooking;
-    private javax.swing.JButton updateBooking;
+    private javax.swing.JButton cancelBooking; 
+    private javax.swing.JButton updateBooking; 
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1; 
+    private javax.swing.JTable jTable1;
     private javax.swing.JTextField jTextField1;
 
     private DatabaseConnectionHandler dbHandler;
     private Customer customer;
+    private Booking booking;
 
     public UpdateBookings(Customer customer, DatabaseConnectionHandler dbHandler) {
         this.dbHandler = dbHandler;
@@ -26,6 +30,12 @@ public class UpdateBookings extends javax.swing.JFrame {
 
     //TODO: MANRAJ
     private void fillTable() {
+        DefaultTableModel model = (DefaultTableModel) this.jTable1.getModel();
+        model.setRowCount(0);
+        List<List<Object>> bookings = dbHandler.getBooking(customer);
+        for (List<Object> curr : bookings) {
+            model.addRow(new Object[] {curr.get(0), curr.get(1), curr.get(2)});
+        }
     }
 
     /**
@@ -133,10 +143,19 @@ public class UpdateBookings extends javax.swing.JFrame {
 
     //TODO: SATYAK
     private void updateBookingActionPerformed(ActionEvent evt) {
+        java.sql.Date endDate = java.sql.Date.valueOf(jTextField1.toString());
+        String creditCard = this.customer.getCreditCard();
+        int bookingID = booking.getBookingID();
+        dbHandler.updateBooking(creditCard, bookingID, endDate);
+       // fillTable();
     }
 
     //TODO: SATYAK
     private void cancelBookingActionPerformed(ActionEvent evt) {
+        String creditCard = this.customer.getCreditCard();
+        int bookingID = booking.getBookingID();
+        dbHandler.updateBooking(creditCard, bookingID, null);
+        fillTable();
     }
 
 }

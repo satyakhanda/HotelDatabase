@@ -73,7 +73,7 @@ public class HotelManagerUI extends javax.swing.JFrame {
     }
 
     private void displayRoomButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        java.awt.EventQueue.invokeLater(() -> new DisplayRooms(dbHandler.getRoomsForHotel(manager.getHotelID())).setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new DisplayRooms(dbHandler.getRoomsForHotel(manager.getHotelID()), dbHandler, manager.getHotelID()).setVisible(true));
     }
 
 }

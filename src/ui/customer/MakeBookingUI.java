@@ -1,7 +1,16 @@
 package ui.customer;
 
 import database.DatabaseConnectionHandler;
+import model.amenities.Booking;
+import model.amenities.Room;
 import model.customers.Customer;
+
+import javax.swing.table.DefaultTableModel;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 public class MakeBookingUI extends javax.swing.JFrame {
     private javax.swing.JTextField dateFrom;
@@ -32,6 +41,12 @@ public class MakeBookingUI extends javax.swing.JFrame {
     //TODO: MANRAJ
     //TODO: fill JTable with available bookings
     private void fillTable() {
+        DefaultTableModel model = (DefaultTableModel) this.jTable1.getModel();
+        model.setRowCount(0);
+        HashMap<String, Room> rooms = dbHandler.getAvailableRooms();
+        for (String key : rooms.keySet()) {
+            model.addRow(new Object[] {key, rooms.get(key).getRoom_num(), rooms.get(key).getRate()});
+        }
     }
 
     /**
@@ -183,10 +198,16 @@ public class MakeBookingUI extends javax.swing.JFrame {
     //TODO: SATYAK
     //TODO: this should make a booking object from the stuff entered in JTextFields and then insert it
     private void makeBookingActionPerformed(java.awt.event.ActionEvent evt) {
-//        Booking newBooking = new Booking(5, new Date()); // THIS LINE IS THE MAIN ONE THAT NEEDS TO BE DONE
-//        dbHandler.insertBooking(newBooking, curr, new Room(Integer.parseInt(roomNum.getText()),
-//                                                           null, 0, newBooking.getBookingID());
-        java.awt.EventQueue.invokeLater(() -> new BookingConfirmation(dbHandler.getRateForRoom(Integer.parseInt(roomNum.getText())), curr, dbHandler).setVisible(true));
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat("YYYY-MM-DD");
+            Date startDate = formatter.parse(dateFrom.toString());
+            Date endDate = formatter.parse(dateUntil.toString());
+            Booking newBooking = new Booking(5, startDate, endDate, Integer.parseInt(sizeOfParty.toString())); // THIS LINE IS THE MAIN ONE THAT NEEDS TO BE DONE
+            dbHandler.insertBooking(newBooking, curr, Integer.parseInt(roomNum.toString()));
+            java.awt.EventQueue.invokeLater(() -> new BookingConfirmation(dbHandler.getRateForRoom(Integer.parseInt(roomNum.getText())), curr, dbHandler).setVisible(true));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     private void viewBookingsActionPerformed(java.awt.event.ActionEvent evt) {
