@@ -2,6 +2,7 @@ package ui.manager;
 
 import database.DatabaseConnectionHandler;
 import model.amenities.Room;
+import model.employees.Cleaner;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.HashMap;
@@ -17,7 +18,7 @@ public class DisplayRooms extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTable allRooms;
-    private javax.swing.JTable bookedByAll;
+    private javax.swing.JTable cleanedAll;
     private javax.swing.JTable mostPopular;
 
     private List<Room> rooms;
@@ -28,7 +29,7 @@ public class DisplayRooms extends javax.swing.JFrame {
         this.rooms = roomsForHotel;
         initComponents();
         fillTableAllRooms();
-        fillTableBookedByAll();
+        fillTableCleanedAll();
         fillTableMostPopular();
         getAVGPartySize(hotelID);
     }
@@ -51,12 +52,16 @@ public class DisplayRooms extends javax.swing.JFrame {
         }
     }
 
-    private void fillTableBookedByAll() {
-        DefaultTableModel model = (DefaultTableModel) this.bookedByAll.getModel();
+    private void fillTableCleanedAll() {
+        DefaultTableModel model = (DefaultTableModel) this.cleanedAll.getModel();
         model.setRowCount(0);
-        List<Room> byAll = dbHandler.bookedByAll();
-        for (Room curr : byAll) {
-            model.addRow(new Object[] {curr.getRoom_num(), curr.getRate()});
+//        List<Room> byAll = dbHandler.bookedByAll();
+//        for (Room curr : byAll) {
+//            model.addRow(new Object[] {curr.getRoom_num(), curr.getRate()});
+//        }
+        List<Cleaner> cleaners = dbHandler.cleanedAllBooked();
+        for (Cleaner curr : cleaners) {
+            model.addRow(new Object[] {curr.getEmployeeName(), curr.getEmployeeID()});
         }
     }
 
@@ -91,7 +96,7 @@ public class DisplayRooms extends javax.swing.JFrame {
             jLabel1 = new javax.swing.JLabel();
             jLabel2 = new javax.swing.JLabel();
             jScrollPane2 = new javax.swing.JScrollPane();
-            bookedByAll = new javax.swing.JTable();
+            cleanedAll = new javax.swing.JTable();
             jLabel3 = new javax.swing.JLabel();
             avgNum = new javax.swing.JLabel();
             jScrollPane3 = new javax.swing.JScrollPane();
@@ -123,9 +128,9 @@ public class DisplayRooms extends javax.swing.JFrame {
 
             jLabel1.setText("All Rooms:");
 
-            jLabel2.setText("Rooms Booked By All Customers:");
+            jLabel2.setText("Cleaners that have Cleaned all Booked Rooms:");
 
-            bookedByAll.setModel(new javax.swing.table.DefaultTableModel(
+            cleanedAll.setModel(new javax.swing.table.DefaultTableModel(
                     new Object [][] {
                             {null, null},
                             {null, null},
@@ -133,7 +138,7 @@ public class DisplayRooms extends javax.swing.JFrame {
                             {null, null}
                     },
                     new String [] {
-                            "Number", "Rate ($CAD)"
+                            "Name", "Employee ID"
                     }
             ) {
                 Class[] types = new Class [] {
@@ -144,7 +149,7 @@ public class DisplayRooms extends javax.swing.JFrame {
                     return types [columnIndex];
                 }
             });
-            jScrollPane2.setViewportView(bookedByAll);
+            jScrollPane2.setViewportView(cleanedAll);
 
             jLabel3.setText("Your Hotel's Average Party Size:");
 

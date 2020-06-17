@@ -181,6 +181,53 @@ public class DatabaseConnectionHandler {
         return allRooms;
     }
 
+    public List<Cleaner> cleanedAllBooked() {
+        List<Cleaner> allCleaners = new ArrayList<>();
+        try {
+
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("SELECT * " +
+                    "FROM Cleaner c " +
+                    "WHERE NOT EXISTS" +
+                    " ((SELECT r.Room_Number FROM Room r, HotelHasBooking h1 Where h1.bookingID = r.bookingID)" +
+                    " MINUS" +
+                    " (SELECT r2.Room_Number FROM HotelHasBooking h, Cleans s, Room r2" +
+                    " WHERE h.bookingID = r2.bookingID AND s.Room_Number = r2.Room_Number AND s.EmployeeID = c.EmployeeID))");
+            while(resultSet.next()) {
+                Cleaner curr = new Cleaner(resultSet.getInt("EmployeeID"),
+                        resultSet.getString("Cln_Name"),
+                        resultSet.getInt("HotelID"));
+                allCleaners.add(curr);
+            }
+
+
+            resultSet.close();
+            stmt.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return allCleaners;
+    }
+
+    public List<Integer> getCleanersIDForHotel(int hotelID) {
+        List<Integer> allCleanersID = new ArrayList<>();
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("SELECT EmployeeID " +
+                    "FROM Cleaner c WHERE c.HotelID = " + hotelID);
+            while(resultSet.next()) {
+                int curr = resultSet.getInt("EmployeeID");
+                allCleanersID.add(curr);
+            }
+            resultSet.close();
+            stmt.close();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return allCleanersID;
+    }
+
     public List<Room> mostPopularRooms() {
         List<Room> allRooms = new ArrayList<>();
         try {
