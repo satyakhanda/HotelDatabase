@@ -22,7 +22,7 @@ public class Hotel {
     }
 
     public void login(String username, String password) {
-        boolean didConnect = dbHandler.login("ora_satyakh", "a90699489");
+        boolean didConnect = dbHandler.login("ora_name88", "a43457738");
 
         if (didConnect) {
             //get rid of login ui

@@ -4,8 +4,6 @@ drop table DependentHas;
 drop table NonMember;
 drop table HotelMember;
 drop table Booking cascade constraints;
--- drop table CustomerMakesBooking;
--- drop table CustomerUpdatesBooking;
 drop table CustomerBooking cascade constraints;
 drop table Account cascade constraints;
 drop table Room cascade constraints;
@@ -40,8 +38,9 @@ CREATE TABLE Payment(
 	RoomCost Float,
 	AdditionalCosts Float,
 	PRIMARY KEY (PaymentID),
-	FOREIGN KEY (RoomCost) REFERENCES BasicCost /*ON UPDATE CASCADE*/);
-				/*ON DELETE NO ACTION*/
+	FOREIGN KEY (RoomCost) REFERENCES BasicCost
+);
+
 grant select on Payment to public;
 
 
@@ -68,8 +67,8 @@ CREATE TABLE Account(
 	Password varchar(80) NOT NULL,
 	CreditCard varchar(16) NOT NULL,
 	PRIMARY KEY (Username)
-	/*FOREIGN KEY (CreditCard) REFERENCES Customer ON UPDATE CASCADE*/);
-			    /*ON DELETE NO ACTION*/
+);
+
 grant select on Account to public;
 
 
@@ -79,9 +78,9 @@ CREATE TABLE Customer (
  	Account varchar(15) Not NULL UNIQUE,
     PaymentID int UNIQUE,
     PRIMARY KEY (CreditCard),
-    FOREIGN KEY (Email) REFERENCES CustomerDetails ON DELETE CASCADE /*ON UPDATE CASCADE*/,
-    FOREIGN KEY (Account) REFERENCES Account ON DELETE CASCADE /*ON UPDATE CASCADE*/,
-    FOREIGN KEY (PaymentID) REFERENCES Payment /*ON UPDATE CASCADE*/
+    FOREIGN KEY (Email) REFERENCES CustomerDetails ON DELETE CASCADE,
+    FOREIGN KEY (Account) REFERENCES Account ON DELETE CASCADE,
+    FOREIGN KEY (PaymentID) REFERENCES Payment
 );
 grant select on Customer to public;
 
@@ -91,7 +90,7 @@ CREATE TABLE DependentHas (
 	Age int,
 	CreditCard varchar(16),
 	PRIMARY KEY (CreditCard, Dep_Name),
-	FOREIGN KEY (CreditCard) REFERENCES Customer ON DELETE CASCADE /*ON UPDATE CASCADE*/
+	FOREIGN KEY (CreditCard) REFERENCES Customer ON DELETE CASCADE
 );
 grant select on DependentHas to public;
 
@@ -99,7 +98,7 @@ grant select on DependentHas to public;
 CREATE TABLE NonMember (
 	CreditCard varchar(16),
 	PRIMARY KEY (CreditCard),
-	FOREIGN KEY (CreditCard) REFERENCES Customer /*ON UPDATE CASCADE*/
+	FOREIGN KEY (CreditCard) REFERENCES Customer
 );
 grant select on NonMember to public;
 
@@ -108,7 +107,7 @@ CREATE TABLE HotelMember (
 	CreditCard varchar(16),
 	Points int,
 	PRIMARY KEY (CreditCard),
-	FOREIGN KEY (CreditCard) REFERENCES Customer /*ON UPDATE CASCADE*/
+	FOREIGN KEY (CreditCard) REFERENCES Customer
 );
 grant select on HotelMember to public;
 
@@ -118,22 +117,10 @@ CREATE TABLE CustomerBooking(
 	BookingID int,
 	EndDate varchar(80),
 	PRIMARY KEY (CreditCard, BookingID),
-	FOREIGN KEY (CreditCard) REFERENCES Customer ON DELETE CASCADE /*ON UPDATE CASCADE*/,
-	FOREIGN KEY (BookingID) REFERENCES Booking ON DELETE CASCADE /*ON UPDATE CASCADE*/
+	FOREIGN KEY (CreditCard) REFERENCES Customer ON DELETE CASCADE,
+	FOREIGN KEY (BookingID) REFERENCES Booking ON DELETE CASCADE
 );
 grant select on CustomerBooking to public;
-
-
--- CREATE TABLE CustomerUpdatesBooking(
--- 	CreditCard int,
--- 	BookingID int,
--- 	EndDate varchar(80),
--- 	PRIMARY KEY (CreditCard, BookingID),
--- 	FOREIGN KEY (CreditCard) REFERENCES Customer ON DELETE CASCADE /*ON UPDATE CASCADE*/,
--- 	FOREIGN KEY (BookingID) REFERENCES Booking ON DELETE CASCADE /*ON UPDATE CASCADE*/
--- );
--- grant select on CustomerUpdatesBooking to public;
-
 
 CREATE TABLE Room(
 	Room_Number int,
@@ -141,7 +128,7 @@ CREATE TABLE Room(
 	Rate int NOT NULL,
 	BookingID int,
 	PRIMARY KEY (Room_Number),
-	FOREIGN KEY (BookingID) REFERENCES Booking ON DELETE CASCADE /*ON UPDATE CASCADE*/
+	FOREIGN KEY (BookingID) REFERENCES Booking ON DELETE CASCADE
 );
 grant select on Room to public;
 
@@ -150,8 +137,8 @@ CREATE TABLE HotelHasBooking (
 	HotelID int,
 	BookingID int,
 	PRIMARY KEY (HotelID, BookingID),
-	FOREIGN KEY (HotelID) REFERENCES Hotel ON DELETE CASCADE /*ON UPDATE CASCADE*/,
-    FOREIGN KEY (BookingID) REFERENCES Booking ON DELETE CASCADE /*ON UPDATE CASCADE*/
+	FOREIGN KEY (HotelID) REFERENCES Hotel ON DELETE CASCADE,
+    FOREIGN KEY (BookingID) REFERENCES Booking ON DELETE CASCADE
 );
 grant select on HotelHasBooking to public;
 
@@ -171,7 +158,7 @@ CREATE TABLE Manager (
 	Mng_Name varchar(80),
 	HotelID int NOT NULL,
 	PRIMARY KEY (EmployeeID),
-	FOREIGN KEY (EmployeeID) REFERENCES Employee /*ON UPDATE CASCADE*/ ON DELETE CASCADE,
+	FOREIGN KEY (EmployeeID) REFERENCES Employee ON DELETE CASCADE,
 	FOREIGN KEY (HotelID) REFERENCES Hotel
 );
 grant select on Manager to public;
@@ -182,7 +169,7 @@ CREATE TABLE Cleaner (
 	Cln_Name varchar(80),
 	HotelID int NOT NULL,
 	PRIMARY KEY (EmployeeID),
-    FOREIGN KEY (EmployeeID) REFERENCES Employee /*ON UPDATE CASCADE*/ ON DELETE CASCADE,
+    FOREIGN KEY (EmployeeID) REFERENCES Employee ON DELETE CASCADE,
 	FOREIGN KEY (HotelID) REFERENCES Hotel
 );
 grant select on Cleaner to public;
@@ -192,8 +179,8 @@ CREATE TABLE Cleans (
 	EmployeeID int,
 	Room_Number int,
 	PRIMARY KEY (EmployeeID, Room_Number),
-	FOREIGN KEY (EmployeeID) REFERENCES Employee ON DELETE CASCADE /*ON UPDATE CASCADE*/,
-	FOREIGN KEY (Room_Number) REFERENCES Room ON DELETE CASCADE /*ON UPDATE CASCADE*/
+	FOREIGN KEY (EmployeeID) REFERENCES Employee ON DELETE CASCADE,
+	FOREIGN KEY (Room_Number) REFERENCES Room ON DELETE CASCADE
 );
 grant select on Cleans to public;
 
@@ -202,8 +189,8 @@ CREATE TABLE Checks (
 	PaymentID int,
 	EmployeeID int,
 	PRIMARY KEY (PaymentID, EmployeeID),
-	FOREIGN KEY (PaymentID) REFERENCES Payment ON DELETE CASCADE /*ON UPDATE CASCADE*/,
-	FOREIGN KEY (EmployeeID) REFERENCES Employee /*ON UPDATE CASCADE*/
+	FOREIGN KEY (PaymentID) REFERENCES Payment ON DELETE CASCADE,
+	FOREIGN KEY (EmployeeID) REFERENCES Employee
 );
 grant select on Checks to public;
 

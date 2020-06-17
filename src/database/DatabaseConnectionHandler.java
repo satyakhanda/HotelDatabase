@@ -206,7 +206,7 @@ public class DatabaseConnectionHandler {
         return allRooms;
     }
 
-    public void insertBooking(Booking booking, Customer customer, int roomNum) {
+    public void insertBooking(Booking booking, Customer customer, int roomNum, String hotel) {
         try {
                 PreparedStatement ps = connection.prepareStatement("INSERT INTO booking VALUES (?,?,?,?)");
                 ps.setInt(1, booking.getBookingID());
@@ -235,6 +235,13 @@ public class DatabaseConnectionHandler {
             connection.commit();
             ps1.close();
 
+            PreparedStatement ps4 = connection.prepareStatement("INSERT INTO HotelHasBooking VALUES (?,?)");
+            ps4.setInt(1, getHotelID(hotel));
+            ps4.setInt(2, booking.getBookingID());
+            ps4.executeUpdate();
+            connection.commit();
+            ps4.close();
+
 
             List<Float> temp = getBasicCost();
             int roomCost = getRateForRoom(roomNum);
@@ -256,7 +263,7 @@ public class DatabaseConnectionHandler {
             ps2.close();
 
             Statement stmt1 = connection.createStatement();
-            String query1 = "UPDATE Customer c SET c.PaymentID = " + maxPID + "WHERE c.CreditCard = " + customer.getCreditCard();
+            String query1 = "UPDATE Customer c SET c.PaymentID = " + maxPID + " WHERE c.CreditCard = " + customer.getCreditCard();
             ResultSet resultSet = stmt1.executeQuery(query1);
             resultSet.close();
             stmt1.close();
@@ -265,6 +272,27 @@ public class DatabaseConnectionHandler {
             System.out.println(EXCEPTION_TAG + " " + e.getMessage());
             rollbackConnection();
         }
+    }
+
+    private int getHotelID(String hotel) {
+        int id = 0;
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet resultSet = stmt.executeQuery("SELECT * " +
+                    "FROM Hotel");
+            while(resultSet.next()) {
+                if (resultSet.getString("HotelName").equals(hotel)) {
+                    id = resultSet.getInt("HotelID");
+                    break;
+                }
+            }
+            resultSet.close();
+            stmt.close();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return id;
     }
 
     public List<Float> getBasicCost() {
@@ -319,11 +347,11 @@ public class DatabaseConnectionHandler {
     }
 
     public void cancelBooking(String creditCard, int bookingId, String endDate) {
-        try {
-            Statement stmt = connection.createStatement();
-            String query = "DELETE Booking b WHERE b.bookingId = " + bookingId;
-            ResultSet rs = stmt.executeQuery(query);
-            rs.close();
+//        try {
+//            Statement stmt = connection.createStatement();
+//            String query = "DELETE Booking b WHERE b.bookingId = " + bookingId;
+//            ResultSet rs = stmt.executeQuery(query);
+//            rs.close();
             try {
                 Statement stmt1 = connection.createStatement();
                 String query1 = "DELETE FROM CustomerBooking cb WHERE cb.bookingId = " + bookingId +
@@ -331,7 +359,7 @@ public class DatabaseConnectionHandler {
                 ResultSet rs1 = stmt1.executeQuery(query1);
                 rs1.close();
                 Statement stmt2 = connection.createStatement();
-                String query2 = "UPDATE Room r " + "SET Room_Date = NULL, r.bookingID = NULL " +
+                String query2 = "UPDATE Room r " + "SET Room_Date = NULL " +
                         "WHERE r.bookingID = " + bookingId;
                 ResultSet rs2 = stmt2.executeQuery(query2);
                 rs2.close();
@@ -339,10 +367,10 @@ public class DatabaseConnectionHandler {
                 System.out.println(EXCEPTION_TAG + " " + e.getMessage());
                 rollbackConnection();
             }
-        } catch (SQLException e) {
-            System.out.println(EXCEPTION_TAG + " " + e.getMessage());
-            rollbackConnection();
-        }
+//        } catch (SQLException e) {
+//            System.out.println(EXCEPTION_TAG + " " + e.getMessage());
+//            rollbackConnection();
+//        }
     }
 
     public float makePayment(Customer customer) {
@@ -352,7 +380,7 @@ public class DatabaseConnectionHandler {
             ResultSet rs = stmt.executeQuery("SELECT * from HotelMember m " +
                     "WHERE m.CreditCard = " + customer.getCreditCard());
             if (rs.next() != false) {
-                Customer m = new Member(rs.getString("CreditCard"), customer.getEmail(),
+                Member m = new Member(rs.getString("CreditCard"), customer.getEmail(),
                         customer.getAccount(), customer.getPaymentID(), rs.getInt("Points"));
                 finalPayment = makePaymentMember(m);
             } else {
@@ -360,7 +388,7 @@ public class DatabaseConnectionHandler {
                         customer.getAccount(), customer.getPaymentID());
                 finalPayment = makePaymentNonMember(nm);
             }
-            if (finalPayment == -1.0 ) System.out.println("Messed up in Non mem");
+           // if (finalPayment == -1.0 ) System.out.println("Messed up in Non mem");
             return finalPayment;
         } catch (SQLException e) {
             System.out.println(EXCEPTION_TAG + " " + e.getMessage());
@@ -378,12 +406,12 @@ public class DatabaseConnectionHandler {
                 Payment payment = new Payment(String.valueOf(rs.getInt("PaymentID")),
                         rs.getFloat("RoomCost"), rs.getFloat("AdditionalCosts"));
                 float FinalPayment = payment.getRoomCost() + payment.getAdditionalCost();
-                Statement stmt2 = connection.createStatement();
-                stmt.executeQuery("DELETE FROM Payment p WHERE p.paymentID = " +
-                        payment.getPaymentID());
-                stmt2.close();
+//                Statement stmt2 = connection.createStatement();
+//                stmt.executeQuery("DELETE FROM Payment p WHERE p.paymentID = " +
+//                        payment.getPaymentID());
+//                stmt2.close();
                 Statement stmt4 = connection.createStatement();
-                ResultSet rs4 = stmt.executeQuery("UPDATE customer c SET paymentID = " + null +
+                ResultSet rs4 = stmt.executeQuery("UPDATE customer SET paymentID = NULL" +
                         " WHERE creditcard = " + nm.getCreditCard());
                 stmt4.close();
                 return FinalPayment;
@@ -395,7 +423,7 @@ public class DatabaseConnectionHandler {
         return -1;
     }
 
-    private float makePaymentMember(Customer m) {
+    private float makePaymentMember(Member m) {
         try {
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM Payment p " +
@@ -404,23 +432,26 @@ public class DatabaseConnectionHandler {
                 Payment payment = new Payment(String.valueOf(rs.getInt("PaymentID")),
                         rs.getFloat("RoomCost"), rs.getFloat("AdditionalCosts"));
                 float FinalPayment = payment.getRoomCost() + payment.getAdditionalCost();
-                float points = rs.getInt("Points");
-                if (points > 100*FinalPayment) {
-                    points = points - 100*FinalPayment;
+//                float points = rs.getInt("Points");
+                float points = m.getPoints();
+                if (points > 100 * FinalPayment) {
+                    points = points - (100 * FinalPayment);
+                    points += 10 * FinalPayment;
                     FinalPayment = 0;
                 }
-                Statement stmt2 = connection.createStatement();
-                ResultSet rs2 = stmt2.executeQuery("DELETE FROM Payment p WHERE p.paymentID = " +
-                        payment.getPaymentID());
-                rs2.close();
-                stmt2.close();
+                points += 10 * FinalPayment;
+//                Statement stmt2 = connection.createStatement();
+//                ResultSet rs2 = stmt2.executeQuery("DELETE FROM Payment p WHERE p.paymentID = " +
+//                        payment.getPaymentID());
+//                rs2.close();
+//                stmt2.close();
                 Statement stmt3 = connection.createStatement();
-                ResultSet rs3 = stmt3.executeQuery("UPDATE HotelMember m SET points = " + points + " WHERE member = " +
+                ResultSet rs3 = stmt3.executeQuery("UPDATE HotelMember m SET points = " + points + " WHERE m.creditCard = " +
                         m.getCreditCard());
                 rs3.close();
                 stmt3.close();
                 Statement stmt4 = connection.createStatement();
-                ResultSet rs4 = stmt4.executeQuery("UPDATE customer c SET paymentID = NULL" +
+                ResultSet rs4 = stmt4.executeQuery("UPDATE customer SET paymentID = NULL" +
                         " WHERE creditcard = " + m.getCreditCard());
                 rs4.close();
                 stmt4.close();
@@ -563,7 +594,7 @@ public class DatabaseConnectionHandler {
                     "FROM Room r, Booking b, HotelHasBooking hb, Hotel h " +
                     "WHERE r.BookingID IS NULL OR (r.BookingID = b.BookingID AND b.BookingID = hb.BookingID AND hb.HotelID = h.HotelID AND " +
                     "((b.StartDate > current_date) OR " +
-                    "(b.EndDate < current_date))) " +
+                    "(b.EndDate < current_date) OR r.Room_Date = NULL)) " +
                     "ORDER BY r.Rate");
             while(resultSet.next()) {
                 List<Room> rooms = hotelNameAndRooms.getOrDefault(resultSet.getString("HotelName"), new ArrayList<>());

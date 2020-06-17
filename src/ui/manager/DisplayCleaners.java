@@ -43,14 +43,14 @@ public class DisplayCleaners extends javax.swing.JFrame {
 
         cleanerTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null}
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null}
             },
             new String [] {
-                "EmployeeID", "Name", "HotelID"
+                "EmployeeID", "Name"
             }
         ) {
             Class[] types = new Class [] {
