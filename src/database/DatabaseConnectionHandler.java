@@ -4,9 +4,7 @@ import model.amenities.Booking;
 import model.amenities.Room;
 import model.customers.*;
 import model.employees.Cleaner;
-import model.employees.Employee;
 
-import java.awt.print.Book;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -18,31 +16,17 @@ import java.util.List;
 
 import model.employees.Manager;
 import org.apache.ibatis.jdbc.ScriptRunner;
+import oracle.jdbc.driver.*;
 
-//import ca.ubc.cs304.model.BranchModel;
-/**
- * This class handles all database related transactions
- */
 public class DatabaseConnectionHandler {
-    // Use this version of the ORACLE_URL if you are running the code off of the server
-//	private static final String ORACLE_URL = "jdbc:oracle:thin:@dbhost.students.cs.ubc.ca:1522:stu";
-    // Use this version of the ORACLE_URL if you are tunneling into the undergrad servers
-    //jdbc:oracle:thin:@localhost:1522:stu
     private static final String ORACLE_URL = "jdbc:oracle:thin:@localhost:1522:stu";
     private static final String EXCEPTION_TAG = "[EXCEPTION]";
-    private static final String WARNING_TAG = "[WARNING]";
-
 
     private Connection connection = null;
 
-    private HashMap<Integer, Booking> bookings;
-
     public DatabaseConnectionHandler() {
-        bookings = new HashMap<Integer, Booking>();
         try {
-            // Load the Oracle JDBC driver
-            // Note that the path could change for new drivers
-            DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
+            DriverManager.registerDriver(new OracleDriver());
         } catch (SQLException e) {
             System.out.println(EXCEPTION_TAG + " " + e.getMessage());
         }
@@ -64,7 +48,7 @@ public class DatabaseConnectionHandler {
                 connection.close();
             }
 
-            connection = DriverManager.getConnection(ORACLE_URL, "ora_name88", "a43457738");
+            connection = DriverManager.getConnection(ORACLE_URL, username, password);
             connection.setAutoCommit(false);
 
             System.out.println("\nConnected to Oracle!");
@@ -93,7 +77,6 @@ public class DatabaseConnectionHandler {
             while(resultSet.next()) {
                 List<Object> temp = new ArrayList<Object>();
                 temp.add(resultSet.getInt("BookingID"));
-               // temp.add(resultSet.getInt("Room_Number"));
                 temp.add(resultSet.getInt("SizeOfParty"));
                 temp.add(resultSet.getDate("StartDate"));
                 temp.add(resultSet.getDate("EndDate"));
@@ -107,29 +90,6 @@ public class DatabaseConnectionHandler {
         }
         return retList;
     }
-
-//    public Customer getCustomer(String username, String password) {
-//        try {
-//            Statement stmt = connection.createStatement();
-//            ResultSet resultSet = stmt.executeQuery("SELECT c.CreditCard, c.Account, c.Email, m.Points " +
-//                    "FROM account a, customer c, hotelMember m " +
-//                    "WHERE username = " + username + " AND password = " + password + " AND c.account = " + username +
-//                    " AND m.creditCard = c.creditCard ");
-//            Customer custAccount = null;
-//            while(resultSet.next()) {
-//                custAccount = new Member(resultSet.getString("CrediCard"),
-//                        resultSet.getString("Email"),
-//                        resultSet.getString("Account"), 0,
-//                        resultSet.getInt("Points"));
-//            }
-//            resultSet.close();
-//            stmt.close();
-//            return custAccount;
-//        } catch (SQLException throwables) {
-//            throwables.printStackTrace();
-//        }
-//        return null;
-//    }
 
     public Customer getCustomer(String username, String password) {
         try {
@@ -337,7 +297,7 @@ public class DatabaseConnectionHandler {
     public void updateBooking(String creditCard, int bookingId, String endDate) {
         try {
             if (endDate == null) {
-                cancelBooking(creditCard, bookingId, endDate);
+                cancelBooking(creditCard, bookingId);
                 return;
             }
             Statement stmt = connection.createStatement();
@@ -347,15 +307,16 @@ public class DatabaseConnectionHandler {
             rs.close();
             try {
                 Statement stmt1 = connection.createStatement();
-
                 String query1 = "UPDATE Booking b " + "SET endDate = to_date('" + endDate +
                         "', 'YYYY-MM-DD') WHERE b.bookingId = " + bookingId;
-                ResultSet rs1 = stmt.executeQuery(query1);
+                ResultSet rs1 = stmt1.executeQuery(query1);
                 rs1.close();
+                stmt1.close();
                 Statement stmt2 = connection.createStatement();
                 String query2 = "UPDATE Room r " + "SET Room_Date = " + endDate + " WHERE r.bookingID = " + bookingId;
-                ResultSet rs2 = stmt.executeQuery(query2);
+                ResultSet rs2 = stmt2.executeQuery(query2);
                 rs2.close();
+                stmt2.close();
             } catch (SQLException e) {
                 System.out.println(EXCEPTION_TAG + " " + e.getMessage());
                 rollbackConnection();
@@ -366,12 +327,7 @@ public class DatabaseConnectionHandler {
         }
     }
 
-    public void cancelBooking(String creditCard, int bookingId, String endDate) {
-//        try {
-//            Statement stmt = connection.createStatement();
-//            String query = "DELETE Booking b WHERE b.bookingId = " + bookingId;
-//            ResultSet rs = stmt.executeQuery(query);
-//            rs.close();
+    public void cancelBooking(String creditCard, int bookingId) {
             try {
                 Statement stmt1 = connection.createStatement();
                 String query1 = "DELETE FROM CustomerBooking cb WHERE cb.bookingId = " + bookingId +
@@ -387,15 +343,11 @@ public class DatabaseConnectionHandler {
                 System.out.println(EXCEPTION_TAG + " " + e.getMessage());
                 rollbackConnection();
             }
-//        } catch (SQLException e) {
-//            System.out.println(EXCEPTION_TAG + " " + e.getMessage());
-//            rollbackConnection();
-//        }
     }
 
     public float makePayment(Customer customer) {
         try {
-            float finalPayment = 0;
+            float finalPayment;
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * from HotelMember m " +
                     "WHERE m.CreditCard = " + customer.getCreditCard());
@@ -408,7 +360,6 @@ public class DatabaseConnectionHandler {
                         customer.getAccount(), customer.getPaymentID());
                 finalPayment = makePaymentNonMember(nm);
             }
-           // if (finalPayment == -1.0 ) System.out.println("Messed up in Non mem");
             return finalPayment;
         } catch (SQLException e) {
             System.out.println(EXCEPTION_TAG + " " + e.getMessage());
@@ -426,13 +377,10 @@ public class DatabaseConnectionHandler {
                 Payment payment = new Payment(String.valueOf(rs.getInt("PaymentID")),
                         rs.getFloat("RoomCost"), rs.getFloat("AdditionalCosts"));
                 float FinalPayment = payment.getRoomCost() + payment.getAdditionalCost();
-//                Statement stmt2 = connection.createStatement();
-//                stmt.executeQuery("DELETE FROM Payment p WHERE p.paymentID = " +
-//                        payment.getPaymentID());
-//                stmt2.close();
                 Statement stmt4 = connection.createStatement();
                 ResultSet rs4 = stmt.executeQuery("UPDATE customer SET paymentID = NULL" +
                         " WHERE creditcard = " + nm.getCreditCard());
+                rs4.close();
                 stmt4.close();
                 return FinalPayment;
             }
@@ -452,7 +400,6 @@ public class DatabaseConnectionHandler {
                 Payment payment = new Payment(String.valueOf(rs.getInt("PaymentID")),
                         rs.getFloat("RoomCost"), rs.getFloat("AdditionalCosts"));
                 float FinalPayment = payment.getRoomCost() + payment.getAdditionalCost();
-//                float points = rs.getInt("Points");
                 float points = m.getPoints();
                 if (points > 100 * FinalPayment) {
                     points = points - (100 * FinalPayment);
@@ -460,21 +407,19 @@ public class DatabaseConnectionHandler {
                     FinalPayment = 0;
                 }
                 points += 10 * FinalPayment;
-//                Statement stmt2 = connection.createStatement();
-//                ResultSet rs2 = stmt2.executeQuery("DELETE FROM Payment p WHERE p.paymentID = " +
-//                        payment.getPaymentID());
-//                rs2.close();
-//                stmt2.close();
+
                 Statement stmt3 = connection.createStatement();
                 ResultSet rs3 = stmt3.executeQuery("UPDATE HotelMember m SET points = " + points + " WHERE m.creditCard = " +
                         m.getCreditCard());
                 rs3.close();
                 stmt3.close();
+
                 Statement stmt4 = connection.createStatement();
                 ResultSet rs4 = stmt4.executeQuery("UPDATE customer SET paymentID = NULL" +
                         " WHERE creditcard = " + m.getCreditCard());
                 rs4.close();
                 stmt4.close();
+
                 return FinalPayment;
             }
             rs.close();
@@ -484,27 +429,6 @@ public class DatabaseConnectionHandler {
             rollbackConnection();
         }
         return -1;
-    }
-
-    public List<Employee> getEmployees() {
-        List<Employee> allEmployees = new ArrayList<>();
-        try {
-            Statement stmt = connection.createStatement();
-            ResultSet resultSet = stmt.executeQuery("SELECT * " +
-                    "FROM Employee e");
-            while(resultSet.next()) {
-                Employee curr = new Employee(resultSet.getInt("EmployeeID"),
-                        resultSet.getString("Emp_Name"),
-                        resultSet.getInt("HotelID"));
-                allEmployees.add(curr);
-            }
-            resultSet.close();
-            stmt.close();
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return allEmployees;
     }
 
     public List<Manager> getManagers() {
@@ -655,14 +579,6 @@ public class DatabaseConnectionHandler {
     public void insertCustomer(Customer customer, Boolean b, String password, String Name,
                                int Age, String Address) {
         try {
-//            PreparedStatement ps = connection.prepareStatement("INSERT INTO customer VALUES (?,?,?,?)");
-//            ps.setString(1, customer.getCreditCard());
-//            ps.setString(2, customer.getEmail());
-//            ps.setString(3, customer.getAccount());
-//            ps.setInt(4, customer.getPaymentID());
-//            ps.executeUpdate();
-//            connection.commit();
-//            ps.close();
             PreparedStatement ps1 = connection.prepareStatement("INSERT INTO CustomerDetails VALUES (?,?,?,?)");
             ps1.setString(1, customer.getEmail());
             ps1.setString(2, Name);
@@ -671,6 +587,7 @@ public class DatabaseConnectionHandler {
             ps1.executeUpdate();
             connection.commit();
             ps1.close();
+
             insertAccount(customer, password);
             PreparedStatement ps = connection.prepareStatement("INSERT INTO customer VALUES (?,?,?,?)");
             ps.setString(1, customer.getCreditCard());
@@ -684,12 +601,12 @@ public class DatabaseConnectionHandler {
             ps.executeUpdate();
             connection.commit();
             ps.close();
+
             if (b) {
                 insertMember(customer);
             } else {
                 insertNonmember(customer);
             }
-            //insertAccount(customer, password);
         } catch (SQLException e) {
             System.out.println(EXCEPTION_TAG + " " + e.getMessage());
             rollbackConnection();
@@ -698,16 +615,9 @@ public class DatabaseConnectionHandler {
 
     private void insertMember(Customer customer) {
         try {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO HotelMember VALUES (?,?,?,?, ?)");
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO HotelMember VALUES (?,?)");
             ps.setString(1, customer.getCreditCard());
-            ps.setString(2, customer.getEmail());
-            ps.setString(3, customer.getAccount());
-            if (customer.getPaymentID() == null) {
-                ps.setNull(4, Types.NULL);
-            } else {
-                ps.setInt(4, customer.getPaymentID());
-            }
-            ps.setInt(5, 0);
+            ps.setInt(2, 0);
             ps.executeUpdate();
             connection.commit();
             ps.close();
@@ -719,15 +629,8 @@ public class DatabaseConnectionHandler {
 
     private void insertNonmember(Customer customer) {
         try {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO NonMember VALUES (?,?,?,?, ?)");
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO NonMember VALUES (?)");
             ps.setString(1, customer.getCreditCard());
-            ps.setString(2, customer.getEmail());
-            ps.setString(3, customer.getAccount());
-            if (customer.getPaymentID() == null) {
-                ps.setNull(4, Types.NULL);
-            } else {
-                ps.setInt(4, customer.getPaymentID());
-            }
             ps.executeUpdate();
             connection.commit();
             ps.close();
@@ -765,7 +668,6 @@ public class DatabaseConnectionHandler {
         }
         return 0;
     }
-
 
     private void rollbackConnection() {
         try {

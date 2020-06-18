@@ -1,7 +1,5 @@
 package model.amenities;
 
-import java.util.Date;
-
 public class Room {
     private int room_num;
     private String date;

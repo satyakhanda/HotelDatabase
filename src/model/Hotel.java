@@ -3,16 +3,17 @@ package model;
 import database.DatabaseConnectionHandler;
 import ui.OpeningUI;
 
+import javax.swing.*;
+
 
 public class Hotel {
-    private DatabaseConnectionHandler dbHandler = null;
+    private DatabaseConnectionHandler dbHandler;
     public Hotel() {
         dbHandler = new DatabaseConnectionHandler();
     }
 
     private void start() {
-        //start login UI
-        login(" ", " ");
+        login("ora_name88 ", "a43457738");
 
     }
 
@@ -22,44 +23,16 @@ public class Hotel {
     }
 
     public void login(String username, String password) {
-        boolean didConnect = dbHandler.login("ora_name88", "a43457738");
+        boolean didConnect = dbHandler.login(username, password);
 
         if (didConnect) {
-            //get rid of login ui
-            try {
-                for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                    if ("Nimbus".equals(info.getName())) {
-                        javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                        break;
-                    }
-                }
-            } catch (ClassNotFoundException ex) {
-                java.util.logging.Logger.getLogger(OpeningUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-            } catch (InstantiationException ex) {
-                java.util.logging.Logger.getLogger(OpeningUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-            } catch (IllegalAccessException ex) {
-                java.util.logging.Logger.getLogger(OpeningUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-            } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-                java.util.logging.Logger.getLogger(OpeningUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-            }
-            //</editor-fold>
-            //</editor-fold>
-
-            /* Create and display the form */
-            java.awt.EventQueue.invokeLater(new Runnable() {
-                public void run() {
-                    new OpeningUI(dbHandler).setVisible(true);
-                }
-            });
-            //new OpeningUI(dbHandler);
-        } else {
-            //display failed login, retry
+            java.awt.EventQueue.invokeLater(() -> new OpeningUI(dbHandler).setVisible(true));
         }
     }
     public static void main(String[] args) {
         Hotel hotel = new Hotel();
         hotel.start();
-        //hotel.end();
+
     }
 
 }
